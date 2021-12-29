@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "610594397992",
+    "project_id": "subman-74e5f",
+    "storage_bucket": "subman-74e5f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:610594397992:android:e03c2cc9993274cb6aba1d",
+        "android_client_info": {
+          "package_name": "com.oy3limited.sub_man"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "610594397992-tkvgkcuf5appktt2mpptuqrbgml8ksfl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBey2C7NMoRofE5ye3jtVNAXOZRiAhkO7s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "610594397992-tkvgkcuf5appktt2mpptuqrbgml8ksfl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
