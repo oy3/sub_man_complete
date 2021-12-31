@@ -598,8 +598,8 @@ class _ExpensesScreenState extends State<ExpensesScreen>
                   const Divider(),
               itemBuilder: (BuildContext context, int index) {
                 var item;
-                categoryType.map((data) {
-                  var index = categoryType.indexOf(data);
+                var data = categoryType[index];
+
                   item = Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     child: Row(
@@ -623,7 +623,7 @@ class _ExpensesScreenState extends State<ExpensesScreen>
                       ],
                     ),
                   );
-                }).toList();
+
                 return item;
               },
             ),

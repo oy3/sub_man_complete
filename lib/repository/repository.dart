@@ -323,23 +323,6 @@ class Repository {
     return total;
   }
 
-  /*Future<num>*/
-  /*doGetExpensePaid() async {
-    var list = [];
-    await firebaseFirestore
-        .collection('users')
-        .doc(_firebaseAuth.currentUser!.uid)
-        .collection('subscriptions')
-        .get()
-        .then((value) {
-      var data = value.docs.forEach((doc) {
-        list.add(doc['plans']);
-        // debugPrint(doc['plans'].toString());
-      });
-      debugPrint('list: ${list.toString()}');
-    });
-  }*/
-
   doGetExpensePaid() async {
     List<num> amounts = [];
     var total;
@@ -479,7 +462,6 @@ class Repository {
       data.docs.forEach((element) {
         var date = element['bill_date'] as Timestamp;
 
-
         if (date.toDate().weekday == 1) {
           amounts.update(0, (value) => value + element['amount']);
         } else if (date.toDate().weekday == 2) {
@@ -497,7 +479,6 @@ class Repository {
         }
 
         // debugPrint('amount: $amounts');
-
       });
     });
 
@@ -563,18 +544,6 @@ class Repository {
     return true;
   }
 
-/*  Future<void> doGetUserDetails(String userId) async {
-    return await firebaseFirestore
-        .collection('users')
-        .doc(userId)
-        .get()
-        .then((DocumentSnapshot documentSnapshot) {
-      if (documentSnapshot.exists) {
-        print('Document exists ${documentSnapshot.data()} on the database');
-      }
-    });
-  }*/
-
   Future<UserResponse> doGetUserDetails(String userId) async {
     Map<String, dynamic> userResponse = {};
 
@@ -605,5 +574,42 @@ class Repository {
     } else {
       return UserResponse.fromJson(userResponse);
     }
+  }
+
+  //**
+  Future<num> doGetYearlySumByCategory(String category) async {
+    DateTime first = DateTime.utc(DateTime.now().year, DateTime.january, 1);
+    DateTime last = DateTime.utc(DateTime.now().year, DateTime.december, 31);
+
+    List<num> amounts = [];
+    num total = 0;
+
+    var sub = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: category)
+        .get();
+
+     sub.docs.forEach((doc) async {
+      var amountData = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData.docs.forEach((element) {
+        amounts.add(element['amount']);
+      });
+      debugPrint('Amount List: $amounts');
+      total = amounts.sum;
+      debugPrint('Total Amount: $total');
+    });
+
+    return total;
   }
 }

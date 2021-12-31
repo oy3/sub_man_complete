@@ -25,9 +25,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late UserResponse? _currentUser;
   Repository repository = Repository();
 
+  num software = 0, entertainment = 0, internet = 0, others = 0;
+
   @override
   void initState() {
     super.initState();
+
+ /*   repository.doGetYearlySumByCategory('software').then((value) {
+      setState(() {
+        software = value;
+      });
+    });*/
+
+    repository.doGetYearlySumByCategory('entertainment').then((value) {
+      debugPrint('before_amounts: $value');
+
+        entertainment = value;
+
+      debugPrint('amounts: ${entertainment.toDouble().toString()}');
+    });
+
+/*    repository.doGetYearlySumByCategory('internet').then((value) {
+      setState(() {
+        internet = value;
+      });
+    });
+    repository.doGetYearlySumByCategory('others').then((value) {
+      setState(() {
+        others = value;
+      });
+    });*/
+
+
   }
 
   @override
@@ -39,17 +68,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         var email = '';
 
         // if (!asyncSnapshot.hasError) {
-          /*     if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+        /*     if (asyncSnapshot.connectionState == ConnectionState.waiting) {
             return Center(
                 child: CircularProgressIndicator(color: Colors.black));
           }*/
-          if (asyncSnapshot.hasData) {
-            _currentUser = asyncSnapshot.data;
+        if (asyncSnapshot.hasData) {
+          _currentUser = asyncSnapshot.data;
 
-            name = widget.user.displayName!;
-            email = widget.user.email!;
-          }
-          /* else {
+          name = widget.user.displayName!;
+          email = widget.user.email!;
+        }
+        /* else {
             return Center(
                 child: Text("No details for this user",
                     style: TextStyle(color: Colors.black)));

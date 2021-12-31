@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sub_man/bloc/user_subscription_list_bloc.dart';
 import 'package:sub_man/model/user_subscriptions.dart';
 import 'package:sub_man/model/user_subscriptions_list_response.dart';
+import 'package:sub_man/screens/reminder_screen.dart';
 import 'package:sub_man/style/theme.dart' as Style;
 import 'package:iconsax/iconsax.dart';
 import 'package:sub_man/widgets/subscription_item_card.dart';
@@ -66,7 +67,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontSize: 25,
                     ))),
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ReminderScreen()));
+                    },
                     icon: Stack(
                       children: [
                         Icon(Iconsax.notification_bing5,
