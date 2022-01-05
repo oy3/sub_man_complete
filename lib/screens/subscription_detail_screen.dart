@@ -82,7 +82,7 @@ class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
             ],
           ),
         ),
-        actions: [
+       /* actions: [
           Center(
             child: Container(
               margin: EdgeInsets.only(right: 10),
@@ -94,7 +94,7 @@ class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
                           fontSize: 18))),
             ),
           ),
-        ],
+        ],*/
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
@@ -279,7 +279,14 @@ class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
                             fontWeight: FontWeight.w400,
                             fontSize: 16,
                           ))),
-                      Container(
+                      Text(activePlan!.reminder.toTitleCase().toCapitalized(),
+                          style: GoogleFonts.roboto(
+                              textStyle: TextStyle(
+                                color: Style.Colors.secondaryColor5,
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                              ))),
+                      /*Container(
                         width: 150,
                         child: DropdownButton<String>(
                           value: dropdownReminderValue,
@@ -314,7 +321,7 @@ class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
                             });
                           },
                         ),
-                      ),
+                      ),*/
                     ],
                   )
                 ],

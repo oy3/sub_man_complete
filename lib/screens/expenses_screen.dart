@@ -19,7 +19,32 @@ class _ExpensesScreenState extends State<ExpensesScreen>
 
   Repository repository = Repository();
 
-  var yearData, weekData;
+  Map<int, dynamic> yearData = {
+    0: 0,
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+    6: 0,
+    7: 0,
+    8: 0,
+    9: 0,
+    10: 0,
+    11: 0
+  };
+
+
+
+  Map<int, dynamic> weekData = {
+    0: 0,
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: 0,
+    6: 0,
+  };
 
   final List<Map<String, dynamic>> categoryType = [
     {'color': Style.Colors.barColor, 'type': 'Software', 'price': '725.00'},
@@ -36,19 +61,17 @@ class _ExpensesScreenState extends State<ExpensesScreen>
   void initState() {
     super.initState();
 
-    repository.doGetExpenseByDay().then((value) {
-      setState(() {
-        weekData = value;
-      });
-      debugPrint('Week amounts = $weekData');
-    });
+/*    repository.doGetExpenseByDay().then((value) {
+      weekData = value;
 
-    repository.doGetExpenseByMonth().then((value) {
-      setState(() {
-        yearData = value;
-      });
-      // debugPrint('Month amounts = $yearData');
-    });
+      debugPrint('Week amounts = $weekData');
+    });*/
+
+/*    repository.doGetExpenseByMonth().then((value) {
+      yearData = value;
+
+      debugPrint('Year amounts = $yearData');
+    });*/
 
     tabController = TabController(length: 2, vsync: this);
     tabController!.addListener(() {
@@ -600,29 +623,29 @@ class _ExpensesScreenState extends State<ExpensesScreen>
                 var item;
                 var data = categoryType[index];
 
-                  item = Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Indicator(
-                          textColor: Style.Colors.secondaryColor2,
-                          color: data['color'],
-                          text: data['type'].toString(),
-                          isSquare: false,
-                        ),
-                        Text(
-                          Style.Strings.gbpSymbol + data['price'].toString(),
-                          style: GoogleFonts.roboto(
-                              textStyle: TextStyle(
-                            color: Style.Colors.secondaryColor5,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 20,
-                          )),
-                        )
-                      ],
-                    ),
-                  );
+                item = Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Indicator(
+                        textColor: Style.Colors.secondaryColor2,
+                        color: data['color'],
+                        text: data['type'].toString(),
+                        isSquare: false,
+                      ),
+                      Text(
+                        Style.Strings.gbpSymbol + data['price'].toString(),
+                        style: GoogleFonts.roboto(
+                            textStyle: TextStyle(
+                          color: Style.Colors.secondaryColor5,
+                          fontWeight: FontWeight.w400,
+                          fontSize: 20,
+                        )),
+                      )
+                    ],
+                  ),
+                );
 
                 return item;
               },

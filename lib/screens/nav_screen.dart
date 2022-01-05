@@ -9,6 +9,7 @@ import 'package:sub_man/bloc/subscription_list_bloc.dart';
 import 'package:sub_man/model/subscription_list_response.dart';
 import 'package:sub_man/model/subscriptions.dart';
 import 'package:sub_man/screens/expenses_screen.dart';
+import 'package:sub_man/screens/expenses_screen2.dart';
 import 'package:sub_man/screens/home_screen.dart';
 import 'package:sub_man/screens/profile_screen.dart';
 import 'package:sub_man/screens/subscriptions_screen.dart';
@@ -55,7 +56,7 @@ class _NavScreenState extends State<NavScreen> {
         },
         children: <Widget>[
           HomeScreen(user: _currentUser),
-          ExpensesScreen(),
+          ExpensesScreen2(),
           SubscriptionsScreen(),
           ProfileScreen(user: _currentUser)
         ],

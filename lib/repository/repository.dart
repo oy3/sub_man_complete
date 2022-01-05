@@ -351,7 +351,7 @@ class Repository {
     debugPrint('Total Amount: $total');
   }
 
-  Future<Map<int, dynamic>> doGetExpenseByMonth() async {
+  Future<List<Map<String, dynamic>>> doGetExpenseByMonth() async {
     DateTime first = DateTime.utc(DateTime.now().year, DateTime.january, 1);
     DateTime last = DateTime.utc(DateTime.now().year, DateTime.december, 31);
 
@@ -376,7 +376,8 @@ class Repository {
         .collection('subscriptions')
         .get();
 
-    sub.docs.forEach((doc) async {
+    var documentData = sub.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData) {
       var data = await firebaseFirestore
           .collection('users')
           .doc(_firebaseAuth.currentUser!.uid)
@@ -418,19 +419,33 @@ class Repository {
         }
         // debugPrint(amounts.toString());
       });
-    });
+    }
 
-    return amounts;
+    return [
+      {'domain': 'Jan', 'measure': amounts[0]},
+      {'domain': 'Feb', 'measure': amounts[1]},
+      {'domain': 'Mar', 'measure': amounts[2]},
+      {'domain': 'Apr', 'measure': amounts[3]},
+      {'domain': 'May', 'measure': amounts[4]},
+      {'domain': 'Jun', 'measure': amounts[5]},
+      {'domain': 'Jul', 'measure': amounts[6]},
+      {'domain': 'Aug', 'measure': amounts[7]},
+      {'domain': 'Sep', 'measure': amounts[8]},
+      {'domain': 'Oct', 'measure': amounts[9]},
+      {'domain': 'Nov', 'measure': amounts[10]},
+      {'domain': 'Dec', 'measure': amounts[11]},
+    ];
   }
 
-  Future<Map<int, dynamic>> doGetExpenseByDay() async {
+  Future<List<Map<String, dynamic>>> doGetExpenseByDay() async {
     DateTime first =
         DateTime.now().subtract(new Duration(days: DateTime.now().weekday - 1));
 
     DateTime last =
         DateTime.now().subtract(new Duration(days: DateTime.now().weekday - 7));
 
-    debugPrint('week: $first and $last');
+    debugPrint('This Week: $first and $last');
+
     Map<int, dynamic> amounts = {
       0: 0,
       1: 0,
@@ -447,7 +462,9 @@ class Repository {
         .collection('subscriptions')
         .get();
 
-    sub.docs.forEach((doc) async {
+    var documentData = sub.docs;
+
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData) {
       var data = await firebaseFirestore
           .collection('users')
           .doc(_firebaseAuth.currentUser!.uid)
@@ -477,12 +494,109 @@ class Repository {
         } else if (date.toDate().weekday == 7) {
           amounts.update(6, (value) => value + element['amount']);
         }
-
-        // debugPrint('amount: $amounts');
       });
-    });
+    }
 
-    return amounts;
+    // debugPrint('amounts: $amounts');
+
+    return [
+      {'domain': 'Mon', 'measure': amounts[0]},
+      {'domain': 'Tues', 'measure': amounts[1]},
+      {'domain': 'Wed', 'measure': amounts[2]},
+      {'domain': 'Thurs', 'measure': amounts[3]},
+      {'domain': 'Fri', 'measure': amounts[4]},
+      {'domain': 'Sat', 'measure': amounts[5]},
+      {'domain': 'Sun', 'measure': amounts[6]}
+    ];
+  }
+
+  Future<List<Map<String, dynamic>>> doGetExpenseByHour() async {
+    var today = DateTime.now();
+    today = DateTime(today.year, today.month, today.day);
+
+    // debugPrint('Today: $today');
+
+    Map<int, dynamic> amounts = {
+      0: 0,
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      7: 0,
+      8: 0,
+      9: 0,
+      10: 0,
+      11: 0
+    };
+
+    var sub = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .get();
+
+    var documentData = sub.docs;
+
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData) {
+      var data = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThanOrEqualTo: today)
+          .orderBy('bill_date', descending: true)
+          .get();
+
+      data.docs.forEach((element) {
+        var date = element['bill_date'] as Timestamp;
+
+        if (date.toDate().hour == 0 && date.toDate().hour <= 2) {
+          amounts.update(0, (value) => value + element['amount']);
+        } else if (date.toDate().hour > 2 && date.toDate().hour <= 4) {
+          amounts.update(1, (value) => value + element['amount']);
+        } else if (date.toDate().hour > 4 && date.toDate().hour <= 6) {
+          amounts.update(2, (value) => value + element['amount']);
+        } else if (date.toDate().hour > 6 && date.toDate().hour <= 8) {
+          amounts.update(3, (value) => value + element['amount']);
+        } else if (date.toDate().hour > 8 && date.toDate().hour <= 10) {
+          amounts.update(4, (value) => value + element['amount']);
+        } else if (date.toDate().hour > 10 && date.toDate().hour <= 12) {
+          amounts.update(5, (value) => value + element['amount']);
+        } else if (date.toDate().hour > 12 && date.toDate().hour <= 14) {
+          amounts.update(6, (value) => value + element['amount']);
+        } else if (date.toDate().hour > 14 && date.toDate().hour <= 16) {
+          amounts.update(7, (value) => value + element['amount']);
+        } else if (date.toDate().hour > 16 && date.toDate().hour <= 18) {
+          amounts.update(8, (value) => value + element['amount']);
+        } else if (date.toDate().hour > 18 && date.toDate().hour <= 20) {
+          amounts.update(9, (value) => value + element['amount']);
+        } else if (date.toDate().hour > 20 && date.toDate().hour <= 22) {
+          amounts.update(10, (value) => value + element['amount']);
+        } else if (date.toDate().hour > 22) {
+          amounts.update(11, (value) => value + element['amount']);
+        }
+      });
+    }
+
+    // debugPrint('amounts: $amounts');
+
+    return [
+      {'domain': '0', 'measure': amounts[0]},
+      {'domain': '2', 'measure': amounts[1]},
+      {'domain': '4', 'measure': amounts[2]},
+      {'domain': '6', 'measure': amounts[3]},
+      {'domain': '8', 'measure': amounts[4]},
+      {'domain': '10', 'measure': amounts[5]},
+      {'domain': '12', 'measure': amounts[6]},
+      {'domain': '14', 'measure': amounts[7]},
+      {'domain': '16', 'measure': amounts[8]},
+      {'domain': '18', 'measure': amounts[9]},
+      {'domain': '20', 'measure': amounts[10]},
+      {'domain': '22', 'measure': amounts[11]},
+    ];
   }
 
   Future<bool> deleteSubscription(UserSubscriptions sub) async {
@@ -576,8 +690,7 @@ class Repository {
     }
   }
 
-  //**
-  Future<num> doGetYearlySumByCategory(String category) async {
+  /* Future<num> doGetYearlySumByCategory(String category) async {
     DateTime first = DateTime.utc(DateTime.now().year, DateTime.january, 1);
     DateTime last = DateTime.utc(DateTime.now().year, DateTime.december, 31);
 
@@ -591,7 +704,8 @@ class Repository {
         .where('category', isEqualTo: category)
         .get();
 
-     sub.docs.forEach((doc) async {
+    var documentData = sub.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData) {
       var amountData = await firebaseFirestore
           .collection('users')
           .doc(_firebaseAuth.currentUser!.uid)
@@ -605,11 +719,574 @@ class Repository {
       amountData.docs.forEach((element) {
         amounts.add(element['amount']);
       });
-      debugPrint('Amount List: $amounts');
       total = amounts.sum;
-      debugPrint('Total Amount: $total');
+    }
+
+    // debugPrint('Amount List: $amounts');
+    debugPrint('Total Category Amount: $total');
+    return total;
+  }
+  Future<Map<int, dynamic>> getYearSumByCategory() async {
+    Map<int, dynamic> yearlyCategory = {0: 0, 1: 0, 2: 0, 3: 0};
+
+    doGetYearlySumByCategory('software').then((data) {
+      // debugPrint('software: $data');
+      yearlyCategory.update(0, (value) => value + data);
+    });
+    doGetYearlySumByCategory('entertainment').then((data) {
+      // debugPrint('entertainment: $data');
+      yearlyCategory.update(1, (value) => value + data);
+    });
+    doGetYearlySumByCategory('internet').then((data) {
+      // debugPrint('internet: $data');
+      yearlyCategory.update(2, (value) => value + data);
+    });
+    doGetYearlySumByCategory('others').then((data) {
+      // debugPrint('others: $data');
+      yearlyCategory.update(3, (value) => value + data);
     });
 
-    return total;
+    // debugPrint('Total List: $yearlyCategory');
+
+    return yearlyCategory;
+  }*/
+
+/*  Future<List<Map<String, dynamic>>> doGetYearAmountByCategory() async {
+    DateTime first = DateTime.utc(DateTime.now().year, DateTime.january, 1);
+    DateTime last = DateTime.utc(DateTime.now().year, DateTime.december, 31);
+
+    List<num> softwareAmounts = [];
+    List<num> entertainmentAmounts = [];
+    List<num> internetAmounts = [];
+    List<num> othersAmounts = [];
+    num softwareTotal = 0;
+    num entertainmentTotal = 0;
+    num internetTotal = 0;
+    num othersTotal = 0;
+
+    //For Software Category
+    var sub = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'software')
+        .get();
+
+    var documentData = sub.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData) {
+      var amountData = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData.docs.forEach((element) {
+        softwareAmounts.add(element['amount']);
+      });
+      softwareTotal = softwareAmounts.sum;
+    }
+
+    //For Entertainment Category
+    var sub2 = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'entertainment')
+        .get();
+
+    var documentData2 = sub2.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData2) {
+      var amountData2 = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData2.docs.forEach((element) {
+        entertainmentAmounts.add(element['amount']);
+      });
+      entertainmentTotal = entertainmentAmounts.sum;
+    }
+
+    //For Internet Category
+    var sub3 = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'internet')
+        .get();
+
+    var documentData3 = sub3.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData3) {
+      var amountData3 = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData3.docs.forEach((element) {
+        internetAmounts.add(element['amount']);
+      });
+      internetTotal = internetAmounts.sum;
+    }
+
+    //For Others Category
+    var sub4 = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'others')
+        .get();
+
+    var documentData4 = sub4.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData4) {
+      var amountData4 = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData4.docs.forEach((element) {
+        othersAmounts.add(element['amount']);
+      });
+      othersTotal = othersAmounts.sum;
+    }
+
+    num softwarePer = 0, entertainmentPer = 0, internetPer = 0, othersPer = 0;
+
+    softwarePer = (softwareTotal /
+            (softwareTotal +
+                entertainmentTotal +
+                internetTotal +
+                othersTotal)) *
+        100;
+    entertainmentPer = (entertainmentTotal /
+            (softwareTotal +
+                entertainmentTotal +
+                internetTotal +
+                othersTotal)) *
+        100;
+    internetPer = (internetTotal /
+            (softwareTotal +
+                entertainmentTotal +
+                internetTotal +
+                othersTotal)) *
+        100;
+    othersPer = (othersTotal /
+            (softwareTotal +
+                entertainmentTotal +
+                internetTotal +
+                othersTotal)) *
+        100;
+
+    debugPrint(
+        'Total Yearly Category Amount: $softwareTotal, $entertainmentTotal, $internetTotal, $othersTotal');
+
+    debugPrint(
+        'Total Yearly Category %: $softwarePer, $entertainmentPer, $internetPer, $othersPer');
+    return [
+      {'domain': 'Software', 'measure': softwarePer},
+      {'domain': 'Entertainment', 'measure': entertainmentPer},
+      {'domain': 'Internet', 'measure': internetPer},
+      {'domain': 'Others', 'measure': othersPer},
+    ];
+  }*/
+
+  Future<Map<int, dynamic>> doGetYearAmountByCategory() async {
+    DateTime first = DateTime.utc(DateTime.now().year, DateTime.january, 1);
+    DateTime last = DateTime.utc(DateTime.now().year, DateTime.december, 31);
+
+    List<num> softwareAmounts = [];
+    List<num> entertainmentAmounts = [];
+    List<num> internetAmounts = [];
+    List<num> othersAmounts = [];
+    num softwareTotal = 0;
+    num entertainmentTotal = 0;
+    num internetTotal = 0;
+    num othersTotal = 0;
+
+    //For Software Category
+    var sub = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'software')
+        .get();
+
+    var documentData = sub.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData) {
+      var amountData = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData.docs.forEach((element) {
+        softwareAmounts.add(element['amount']);
+      });
+      softwareTotal = softwareAmounts.sum;
+    }
+
+    //For Entertainment Category
+    var sub2 = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'entertainment')
+        .get();
+
+    var documentData2 = sub2.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData2) {
+      var amountData2 = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData2.docs.forEach((element) {
+        entertainmentAmounts.add(element['amount']);
+      });
+      entertainmentTotal = entertainmentAmounts.sum;
+    }
+
+    //For Internet Category
+    var sub3 = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'internet')
+        .get();
+
+    var documentData3 = sub3.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData3) {
+      var amountData3 = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData3.docs.forEach((element) {
+        internetAmounts.add(element['amount']);
+      });
+      internetTotal = internetAmounts.sum;
+    }
+
+    //For Others Category
+    var sub4 = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'others')
+        .get();
+
+    var documentData4 = sub4.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData4) {
+      var amountData4 = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData4.docs.forEach((element) {
+        othersAmounts.add(element['amount']);
+      });
+      othersTotal = othersAmounts.sum;
+    }
+
+    return {
+      0: softwareTotal,
+      1: entertainmentTotal,
+      2: internetTotal,
+      3: othersTotal
+    };
+  }
+
+  Future<Map<int, dynamic>> doGetWeekAmountByCategory() async {
+    DateTime first =
+        DateTime.now().subtract(new Duration(days: DateTime.now().weekday - 1));
+
+    DateTime last =
+        DateTime.now().subtract(new Duration(days: DateTime.now().weekday - 7));
+
+    List<num> softwareAmounts = [];
+    List<num> entertainmentAmounts = [];
+    List<num> internetAmounts = [];
+    List<num> othersAmounts = [];
+    num softwareTotal = 0;
+    num entertainmentTotal = 0;
+    num internetTotal = 0;
+    num othersTotal = 0;
+
+    //For Software Category
+    var sub = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'software')
+        .get();
+
+    var documentData = sub.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData) {
+      var amountData = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData.docs.forEach((element) {
+        softwareAmounts.add(element['amount']);
+      });
+      softwareTotal = softwareAmounts.sum;
+    }
+
+    //For Entertainment Category
+    var sub2 = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'entertainment')
+        .get();
+
+    var documentData2 = sub2.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData2) {
+      var amountData2 = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData2.docs.forEach((element) {
+        entertainmentAmounts.add(element['amount']);
+      });
+      entertainmentTotal = entertainmentAmounts.sum;
+    }
+
+    //For Internet Category
+    var sub3 = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'internet')
+        .get();
+
+    var documentData3 = sub3.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData3) {
+      var amountData3 = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData3.docs.forEach((element) {
+        internetAmounts.add(element['amount']);
+      });
+      internetTotal = internetAmounts.sum;
+    }
+
+    //For Others Category
+    var sub4 = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'others')
+        .get();
+
+    var documentData4 = sub4.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData4) {
+      var amountData4 = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData4.docs.forEach((element) {
+        othersAmounts.add(element['amount']);
+      });
+      othersTotal = othersAmounts.sum;
+    }
+
+    /*   debugPrint(
+        'Total Weekly Category Amount: $softwareTotal, $entertainmentTotal, $internetTotal, $othersTotal');
+
+    debugPrint(
+        'Total Weekly Category %: $softwarePer, $entertainmentPer, $internetPer, $othersPer');*/
+
+
+    return {
+      0: softwareTotal,
+      1: entertainmentTotal,
+      2: internetTotal,
+      3: othersTotal
+    };
+  }
+
+  Future<Map<int, dynamic>> doGetDayAmountByCategory() async {
+    var today = DateTime.now();
+    today = DateTime(today.year, today.month, today.day);
+
+    List<num> softwareAmounts = [];
+    List<num> entertainmentAmounts = [];
+    List<num> internetAmounts = [];
+    List<num> othersAmounts = [];
+    num softwareTotal = 0;
+    num entertainmentTotal = 0;
+    num internetTotal = 0;
+    num othersTotal = 0;
+
+    //For Software Category
+    var sub = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'software')
+        .get();
+
+    var documentData = sub.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData) {
+      var amountData = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThanOrEqualTo: today)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData.docs.forEach((element) {
+        softwareAmounts.add(element['amount']);
+      });
+      softwareTotal = softwareAmounts.sum;
+    }
+
+    //For Entertainment Category
+    var sub2 = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'entertainment')
+        .get();
+
+    var documentData2 = sub2.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData2) {
+      var amountData2 = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThanOrEqualTo: today)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData2.docs.forEach((element) {
+        entertainmentAmounts.add(element['amount']);
+      });
+      entertainmentTotal = entertainmentAmounts.sum;
+    }
+
+    //For Internet Category
+    var sub3 = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'internet')
+        .get();
+
+    var documentData3 = sub3.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData3) {
+      var amountData3 = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThanOrEqualTo: today)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData3.docs.forEach((element) {
+        internetAmounts.add(element['amount']);
+      });
+      internetTotal = internetAmounts.sum;
+    }
+
+    //For Others Category
+    var sub4 = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .where('category', isEqualTo: 'others')
+        .get();
+
+    var documentData4 = sub4.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData4) {
+      var amountData4 = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('bill_date', isGreaterThanOrEqualTo: today)
+          .orderBy('bill_date', descending: true)
+          .get();
+      amountData4.docs.forEach((element) {
+        othersAmounts.add(element['amount']);
+      });
+      othersTotal = othersAmounts.sum;
+    }
+
+
+    return {
+      0: softwareTotal,
+      1: entertainmentTotal,
+      2: internetTotal,
+      3: othersTotal
+    };
   }
 }

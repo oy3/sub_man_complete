@@ -10,6 +10,7 @@ import 'package:sub_man/screens/login_screen.dart';
 import 'package:sub_man/screens/onboarding_screen.dart';
 import 'package:sub_man/style/theme.dart' as Style;
 import 'package:flutter/services.dart';
+import 'package:sub_man/widgets/utils.dart';
 import 'change_pwd_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -26,37 +27,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Repository repository = Repository();
 
   num software = 0, entertainment = 0, internet = 0, others = 0;
+  num softwarePer = 0, entertainmentPer = 0, internetPer = 0, othersPer = 0;
 
   @override
   void initState() {
     super.initState();
 
- /*   repository.doGetYearlySumByCategory('software').then((value) {
-      setState(() {
-        software = value;
-      });
-    });*/
+    /*   repository.doGetYearlySumByCategory('software').then((value) {
+      software = value;
+
+      softwarePer =
+          (software / (software + entertainment + internet + others)) * 100;
+
+      debugPrint(
+          'software amounts: ${software.toDouble().toString()}, Percentage: $softwarePer%');
+    });
 
     repository.doGetYearlySumByCategory('entertainment').then((value) {
-      debugPrint('before_amounts: $value');
+      entertainment = value;
 
-        entertainment = value;
+      entertainmentPer =
+          (entertainment / (software + entertainment + internet + others)) *
+              100;
 
-      debugPrint('amounts: ${entertainment.toDouble().toString()}');
+      debugPrint(
+          'entertainment amounts: ${entertainment.toDouble().toString()}, Percentage: $entertainmentPer%');
     });
 
-/*    repository.doGetYearlySumByCategory('internet').then((value) {
-      setState(() {
-        internet = value;
-      });
+    repository.doGetYearlySumByCategory('internet').then((value) {
+      internet = value;
+      internetPer =
+          (internet / (software + entertainment + internet + others)) * 100;
+
+      // debugPrint('internet amounts: ${internet.toDouble().toString()}, Percentage: internetPer%');
     });
     repository.doGetYearlySumByCategory('others').then((value) {
-      setState(() {
-        others = value;
-      });
-    });*/
+      others = value;
+      othersPer =
+          (others / (software + entertainment + internet + others)) * 100;
 
+      // debugPrint('others amounts: ${others.toDouble().toString()}, Percentage: othersPer%');
+    });
 
+    debugPrint('Calc = $software%, $entertainment%, $internet%, $others%');*/
   }
 
   @override
@@ -76,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _currentUser = asyncSnapshot.data;
 
           name = widget.user.displayName!;
-          email = widget.user.email!;
+          email = widget.user.email!.toTitleCase();
         }
         /* else {
             return Center(
@@ -211,7 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                 ),
-                Divider(indent: 50, endIndent: 50),
+                /*Divider(indent: 50, endIndent: 50),
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 50, vertical: 8),
                   child: GestureDetector(
@@ -241,7 +254,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                   ),
-                ),
+                ),*/
                 Divider(indent: 50, endIndent: 50),
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 50, vertical: 8),
@@ -304,7 +317,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget categorySheet() => DraggableScrollableSheet(
+ /* Widget categorySheet() => DraggableScrollableSheet(
         initialChildSize: 0.9,
         minChildSize: 0.9,
         maxChildSize: 0.9,
@@ -490,5 +503,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ),
-      );
+      );*/
 }
