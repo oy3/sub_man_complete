@@ -33,7 +33,7 @@ class Strings {
   static var stepThreeTitle = "Statistics";
   static var stepThreeContent =
       "Always take care of your spending with the right data and insightful charts";
-  static var homeTitle1 = "Subscription Total";
+  static var homeTitle1 = "Active Subscription Total";
   static var homeTitle2 = "Upcoming Subscriptions";
   static var bottomNavHome = "Home";
   static var bottomNavExp = "Expenses";

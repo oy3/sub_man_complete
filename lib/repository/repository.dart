@@ -27,8 +27,37 @@ class Repository {
     );
   }
 
+  Future<num> doGetSubSum() async {
+    List<num> amounts = [];
+    var total;
+
+    var snapshot = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .get();
+
+    snapshot.docs.forEach((doc) {
+      if (doc.exists) {
+        doc['plans'].forEach((plans) async {
+          if (plans['active'] == true) {
+            final activePlans = doc['plans'] as List<dynamic>;
+            activePlans.map((data) {
+              amounts.add(data["price"]);
+            }).toList();
+          }
+        });
+      }
+    });
+
+    total = amounts.sum;
+
+    // debugPrint('Total Amount: ${double.parse((total).toStringAsFixed(2))};');
+
+    return total;
+  }
+
   Future<void> doGetBillingHistory(String docId) async {
-    debugPrint(docId);
     await firebaseFirestore
         .collection('users')
         .doc(_firebaseAuth.currentUser!.uid)
@@ -251,13 +280,15 @@ class Repository {
     return false;
   }
 
-  Future<UserSubscriptionsListResponse> doGetUserSubscriptionList() async {
+  Future<UserSubscriptionsListResponse> doGetUserSubscriptionList(
+      String criteria) async {
     List<dynamic> customSubscriptionResponse = [];
 
     await firebaseFirestore
         .collection('users')
         .doc(_firebaseAuth.currentUser!.uid)
         .collection('subscriptions')
+        .orderBy(criteria, descending: false)
         .get()
         .then((QuerySnapshot querySnapshot) {
       if (querySnapshot.docs.isNotEmpty) {
@@ -352,6 +383,10 @@ class Repository {
   }
 
   Future<List<Map<String, dynamic>>> doGetExpenseByMonth() async {
+    var date = new DateTime.now().toString();
+    var dateParse = DateTime.parse(date);
+    int currentYear = dateParse.year;
+
     DateTime first = DateTime.utc(DateTime.now().year, DateTime.january, 1);
     DateTime last = DateTime.utc(DateTime.now().year, DateTime.december, 31);
 
@@ -384,40 +419,42 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThan: first)
+          .where('plan_type', isEqualTo: 'monthly')
+          /* .where('bill_date', isGreaterThan: first)
           .where('bill_date', isLessThan: last)
-          .orderBy('bill_date', descending: true)
+          .orderBy('bill_date', descending: true)*/
           .get();
 
       data.docs.forEach((element) {
         var date = element['bill_date'] as Timestamp;
 
-        if (date.toDate().month == 1) {
-          amounts.update(0, (value) => value + element['amount']);
-        } else if (date.toDate().month == 2) {
-          amounts.update(1, (value) => value + element['amount']);
-        } else if (date.toDate().month == 3) {
-          amounts.update(2, (value) => value + element['amount']);
-        } else if (date.toDate().month == 4) {
-          amounts.update(3, (value) => value + element['amount']);
-        } else if (date.toDate().month == 5) {
-          amounts.update(4, (value) => value + element['amount']);
-        } else if (date.toDate().month == 6) {
-          amounts.update(5, (value) => value + element['amount']);
-        } else if (date.toDate().month == 7) {
-          amounts.update(6, (value) => value + element['amount']);
-        } else if (date.toDate().month == 8) {
-          amounts.update(7, (value) => value + element['amount']);
-        } else if (date.toDate().month == 9) {
-          amounts.update(8, (value) => value + element['amount']);
-        } else if (date.toDate().month == 10) {
-          amounts.update(9, (value) => value + element['amount']);
-        } else if (date.toDate().month == 11) {
-          amounts.update(10, (value) => value + element['amount']);
-        } else if (date.toDate().month == 12) {
-          amounts.update(11, (value) => value + element['amount']);
+        if (date.toDate().year == currentYear) {
+          if (date.toDate().month == 1) {
+            amounts.update(0, (value) => value + element['amount']);
+          } else if (date.toDate().month == 2) {
+            amounts.update(1, (value) => value + element['amount']);
+          } else if (date.toDate().month == 3) {
+            amounts.update(2, (value) => value + element['amount']);
+          } else if (date.toDate().month == 4) {
+            amounts.update(3, (value) => value + element['amount']);
+          } else if (date.toDate().month == 5) {
+            amounts.update(4, (value) => value + element['amount']);
+          } else if (date.toDate().month == 6) {
+            amounts.update(5, (value) => value + element['amount']);
+          } else if (date.toDate().month == 7) {
+            amounts.update(6, (value) => value + element['amount']);
+          } else if (date.toDate().month == 8) {
+            amounts.update(7, (value) => value + element['amount']);
+          } else if (date.toDate().month == 9) {
+            amounts.update(8, (value) => value + element['amount']);
+          } else if (date.toDate().month == 10) {
+            amounts.update(9, (value) => value + element['amount']);
+          } else if (date.toDate().month == 11) {
+            amounts.update(10, (value) => value + element['amount']);
+          } else if (date.toDate().month == 12) {
+            amounts.update(11, (value) => value + element['amount']);
+          }
         }
-        // debugPrint(amounts.toString());
       });
     }
 
@@ -437,14 +474,52 @@ class Repository {
     ];
   }
 
+  doGetExpenseByWeek() {
+    // Current date and time of system
+    String date = DateTime.now().toString();
+
+// This will generate the time and date for first day of month
+    String firstDay = date.substring(0, 8) + '01' + date.substring(10);
+
+// week day for the first day of the month
+    int weekDay = DateTime.parse(firstDay).weekday;
+
+    DateTime testDate = DateTime.now();
+
+    int weekOfMonth;
+
+//  If your calender starts from Monday
+    weekDay--;
+    weekOfMonth = ((testDate.day + weekDay) / 7).ceil();
+    debugPrint('Week of the month: $weekOfMonth');
+    weekDay++;
+
+// If your calender starts from sunday
+    if (weekDay == 7) {
+      weekDay = 0;
+    }
+    weekOfMonth = ((testDate.day + weekDay) / 7).ceil();
+    debugPrint('Week of the month: $weekOfMonth');
+  }
+
   Future<List<Map<String, dynamic>>> doGetExpenseByDay() async {
-    DateTime first =
-        DateTime.now().subtract(new Duration(days: DateTime.now().weekday - 1));
+    DateTime first = DateTime.now().subtract(new Duration(
+        days: DateTime.now().weekday - 1,
+        hours: DateTime.now().hour,
+        minutes: DateTime.now().minute,
+        seconds: DateTime.now().second,
+        microseconds: DateTime.now().microsecond - 999,
+        milliseconds: DateTime.now().millisecond - 999));
 
-    DateTime last =
-        DateTime.now().subtract(new Duration(days: DateTime.now().weekday - 7));
+    DateTime last = DateTime.now().subtract(new Duration(
+        days: DateTime.now().weekday - 7,
+        hours: DateTime.now().hour - 23,
+        minutes: DateTime.now().minute - 59,
+        seconds: DateTime.now().second - 59,
+        microseconds: DateTime.now().microsecond - 999,
+        milliseconds: DateTime.now().millisecond - 999));
 
-    debugPrint('This Week: $first and $last');
+    // debugPrint('This Week: $first and $last');
 
     Map<int, dynamic> amounts = {
       0: 0,
@@ -471,28 +546,31 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThan: first)
-          .where('bill_date', isLessThan: last)
-          .orderBy('bill_date', descending: true)
+          .where('plan_type', isEqualTo: 'daily')
+          // .where('bill_date', isGreaterThan: first)
+          // .where('bill_date', isLessThan: last)
+          // .orderBy('bill_date', descending: true)
           .get();
 
       data.docs.forEach((element) {
         var date = element['bill_date'] as Timestamp;
 
-        if (date.toDate().weekday == 1) {
-          amounts.update(0, (value) => value + element['amount']);
-        } else if (date.toDate().weekday == 2) {
-          amounts.update(1, (value) => value + element['amount']);
-        } else if (date.toDate().weekday == 3) {
-          amounts.update(2, (value) => value + element['amount']);
-        } else if (date.toDate().weekday == 4) {
-          amounts.update(3, (value) => value + element['amount']);
-        } else if (date.toDate().weekday == 5) {
-          amounts.update(4, (value) => value + element['amount']);
-        } else if (date.toDate().weekday == 6) {
-          amounts.update(5, (value) => value + element['amount']);
-        } else if (date.toDate().weekday == 7) {
-          amounts.update(6, (value) => value + element['amount']);
+        if (date.toDate().isAfter(first) && date.toDate().isBefore(last)) {
+          if (date.toDate().weekday == 1) {
+            amounts.update(0, (value) => value + element['amount']);
+          } else if (date.toDate().weekday == 2) {
+            amounts.update(1, (value) => value + element['amount']);
+          } else if (date.toDate().weekday == 3) {
+            amounts.update(2, (value) => value + element['amount']);
+          } else if (date.toDate().weekday == 4) {
+            amounts.update(3, (value) => value + element['amount']);
+          } else if (date.toDate().weekday == 5) {
+            amounts.update(4, (value) => value + element['amount']);
+          } else if (date.toDate().weekday == 6) {
+            amounts.update(5, (value) => value + element['amount']);
+          } else if (date.toDate().weekday == 7) {
+            amounts.update(6, (value) => value + element['amount']);
+          }
         }
       });
     }
@@ -512,9 +590,9 @@ class Repository {
 
   Future<List<Map<String, dynamic>>> doGetExpenseByHour() async {
     var today = DateTime.now();
-    today = DateTime(today.year, today.month, today.day);
+    // today = DateTime(today.year, today.month, today.day);
 
-    // debugPrint('Today: $today');
+    var todayFormat = '${today.year}-${today.month}-${today.day}';
 
     Map<int, dynamic> amounts = {
       0: 0,
@@ -546,42 +624,45 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThanOrEqualTo: today)
-          .orderBy('bill_date', descending: true)
+          .where('plan_type', isEqualTo: 'hourly')
+          // .where('bill_date', isGreaterThanOrEqualTo: today)
+          // .orderBy('bill_date', descending: true)
           .get();
 
       data.docs.forEach((element) {
         var date = element['bill_date'] as Timestamp;
+        var billDate =
+            '${date.toDate().year}-${date.toDate().month}-${date.toDate().day}';
 
-        if (date.toDate().hour == 0 && date.toDate().hour <= 2) {
-          amounts.update(0, (value) => value + element['amount']);
-        } else if (date.toDate().hour > 2 && date.toDate().hour <= 4) {
-          amounts.update(1, (value) => value + element['amount']);
-        } else if (date.toDate().hour > 4 && date.toDate().hour <= 6) {
-          amounts.update(2, (value) => value + element['amount']);
-        } else if (date.toDate().hour > 6 && date.toDate().hour <= 8) {
-          amounts.update(3, (value) => value + element['amount']);
-        } else if (date.toDate().hour > 8 && date.toDate().hour <= 10) {
-          amounts.update(4, (value) => value + element['amount']);
-        } else if (date.toDate().hour > 10 && date.toDate().hour <= 12) {
-          amounts.update(5, (value) => value + element['amount']);
-        } else if (date.toDate().hour > 12 && date.toDate().hour <= 14) {
-          amounts.update(6, (value) => value + element['amount']);
-        } else if (date.toDate().hour > 14 && date.toDate().hour <= 16) {
-          amounts.update(7, (value) => value + element['amount']);
-        } else if (date.toDate().hour > 16 && date.toDate().hour <= 18) {
-          amounts.update(8, (value) => value + element['amount']);
-        } else if (date.toDate().hour > 18 && date.toDate().hour <= 20) {
-          amounts.update(9, (value) => value + element['amount']);
-        } else if (date.toDate().hour > 20 && date.toDate().hour <= 22) {
-          amounts.update(10, (value) => value + element['amount']);
-        } else if (date.toDate().hour > 22) {
-          amounts.update(11, (value) => value + element['amount']);
+        if (billDate.trim() == todayFormat.trim()) {
+          if (date.toDate().hour == 0 && date.toDate().hour <= 1) {
+            amounts.update(0, (value) => value + element['amount']);
+          } else if (date.toDate().hour >= 2 && date.toDate().hour <= 3) {
+            amounts.update(1, (value) => value + element['amount']);
+          } else if (date.toDate().hour >= 4 && date.toDate().hour <= 5) {
+            amounts.update(2, (value) => value + element['amount']);
+          } else if (date.toDate().hour >= 6 && date.toDate().hour <= 7) {
+            amounts.update(3, (value) => value + element['amount']);
+          } else if (date.toDate().hour >= 8 && date.toDate().hour <= 9) {
+            amounts.update(4, (value) => value + element['amount']);
+          } else if (date.toDate().hour >= 10 && date.toDate().hour <= 11) {
+            amounts.update(5, (value) => value + element['amount']);
+          } else if (date.toDate().hour >= 12 && date.toDate().hour <= 13) {
+            amounts.update(6, (value) => value + element['amount']);
+          } else if (date.toDate().hour >= 14 && date.toDate().hour <= 15) {
+            amounts.update(7, (value) => value + element['amount']);
+          } else if (date.toDate().hour >= 16 && date.toDate().hour <= 17) {
+            amounts.update(8, (value) => value + element['amount']);
+          } else if (date.toDate().hour >= 18 && date.toDate().hour <= 19) {
+            amounts.update(9, (value) => value + element['amount']);
+          } else if (date.toDate().hour >= 20 && date.toDate().hour <= 21) {
+            amounts.update(10, (value) => value + element['amount']);
+          } else if (date.toDate().hour >= 22) {
+            amounts.update(11, (value) => value + element['amount']);
+          }
         }
       });
     }
-
-    // debugPrint('amounts: $amounts');
 
     return [
       {'domain': '0', 'measure': amounts[0]},
@@ -909,6 +990,10 @@ class Repository {
   }*/
 
   Future<Map<int, dynamic>> doGetYearAmountByCategory() async {
+    var date = new DateTime.now().toString();
+    var dateParse = DateTime.parse(date);
+    int currentYear = dateParse.year;
+
     DateTime first = DateTime.utc(DateTime.now().year, DateTime.january, 1);
     DateTime last = DateTime.utc(DateTime.now().year, DateTime.december, 31);
 
@@ -937,12 +1022,17 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThan: first)
+          .where('plan_type', isEqualTo: 'monthly')
+          /*.where('bill_date', isGreaterThan: first)
           .where('bill_date', isLessThan: last)
-          .orderBy('bill_date', descending: true)
+          .orderBy('bill_date', descending: true)*/
           .get();
       amountData.docs.forEach((element) {
-        softwareAmounts.add(element['amount']);
+        var date = element['bill_date'] as Timestamp;
+
+        if (date.toDate().year == currentYear) {
+          softwareAmounts.add(element['amount']);
+        }
       });
       softwareTotal = softwareAmounts.sum;
     }
@@ -963,12 +1053,17 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThan: first)
+          .where('plan_type', isEqualTo: 'monthly')
+          /*  .where('bill_date', isGreaterThan: first)
           .where('bill_date', isLessThan: last)
-          .orderBy('bill_date', descending: true)
+          .orderBy('bill_date', descending: true)*/
           .get();
       amountData2.docs.forEach((element) {
-        entertainmentAmounts.add(element['amount']);
+        var date = element['bill_date'] as Timestamp;
+
+        if (date.toDate().year == currentYear) {
+          entertainmentAmounts.add(element['amount']);
+        }
       });
       entertainmentTotal = entertainmentAmounts.sum;
     }
@@ -989,12 +1084,17 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThan: first)
+          .where('plan_type', isEqualTo: 'monthly')
+          /*    .where('bill_date', isGreaterThan: first)
           .where('bill_date', isLessThan: last)
-          .orderBy('bill_date', descending: true)
+          .orderBy('bill_date', descending: true)*/
           .get();
       amountData3.docs.forEach((element) {
-        internetAmounts.add(element['amount']);
+        var date = element['bill_date'] as Timestamp;
+
+        if (date.toDate().year == currentYear) {
+          internetAmounts.add(element['amount']);
+        }
       });
       internetTotal = internetAmounts.sum;
     }
@@ -1015,12 +1115,17 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThan: first)
+          .where('plan_type', isEqualTo: 'monthly')
+          /*.where('bill_date', isGreaterThan: first)
           .where('bill_date', isLessThan: last)
-          .orderBy('bill_date', descending: true)
+          .orderBy('bill_date', descending: true)*/
           .get();
       amountData4.docs.forEach((element) {
-        othersAmounts.add(element['amount']);
+        var date = element['bill_date'] as Timestamp;
+
+        if (date.toDate().year == currentYear) {
+          othersAmounts.add(element['amount']);
+        }
       });
       othersTotal = othersAmounts.sum;
     }
@@ -1034,11 +1139,21 @@ class Repository {
   }
 
   Future<Map<int, dynamic>> doGetWeekAmountByCategory() async {
-    DateTime first =
-        DateTime.now().subtract(new Duration(days: DateTime.now().weekday - 1));
+    DateTime first = DateTime.now().subtract(new Duration(
+        days: DateTime.now().weekday - 1,
+        hours: DateTime.now().hour,
+        minutes: DateTime.now().minute,
+        seconds: DateTime.now().second,
+        microseconds: DateTime.now().microsecond - 999,
+        milliseconds: DateTime.now().millisecond - 999));
 
-    DateTime last =
-        DateTime.now().subtract(new Duration(days: DateTime.now().weekday - 7));
+    DateTime last = DateTime.now().subtract(new Duration(
+        days: DateTime.now().weekday - 7,
+        hours: DateTime.now().hour - 23,
+        minutes: DateTime.now().minute - 59,
+        seconds: DateTime.now().second - 59,
+        microseconds: DateTime.now().microsecond - 999,
+        milliseconds: DateTime.now().millisecond - 999));
 
     List<num> softwareAmounts = [];
     List<num> entertainmentAmounts = [];
@@ -1065,12 +1180,16 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThan: first)
-          .where('bill_date', isLessThan: last)
-          .orderBy('bill_date', descending: true)
+          .where('plan_type', isEqualTo: 'daily')
+          /*.where('bill_date', isGreaterThan: first)
+          .where('bill_date', isLessThan: last
+          .orderBy('bill_date', descending: true))*/
           .get();
       amountData.docs.forEach((element) {
-        softwareAmounts.add(element['amount']);
+        var date = element['bill_date'] as Timestamp;
+        if (date.toDate().isAfter(first) && date.toDate().isBefore(last)) {
+          softwareAmounts.add(element['amount']);
+        }
       });
       softwareTotal = softwareAmounts.sum;
     }
@@ -1091,12 +1210,16 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThan: first)
+          .where('plan_type', isEqualTo: 'daily')
+          /*.where('bill_date', isGreaterThan: first)
           .where('bill_date', isLessThan: last)
-          .orderBy('bill_date', descending: true)
+          .orderBy('bill_date', descending: true)*/
           .get();
       amountData2.docs.forEach((element) {
-        entertainmentAmounts.add(element['amount']);
+        var date = element['bill_date'] as Timestamp;
+        if (date.toDate().isAfter(first) && date.toDate().isBefore(last)) {
+          entertainmentAmounts.add(element['amount']);
+        }
       });
       entertainmentTotal = entertainmentAmounts.sum;
     }
@@ -1117,12 +1240,16 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThan: first)
+          .where('plan_type', isEqualTo: 'daily')
+          /*.where('bill_date', isGreaterThan: first)
           .where('bill_date', isLessThan: last)
-          .orderBy('bill_date', descending: true)
+          .orderBy('bill_date', descending: true)*/
           .get();
       amountData3.docs.forEach((element) {
-        internetAmounts.add(element['amount']);
+        var date = element['bill_date'] as Timestamp;
+        if (date.toDate().isAfter(first) && date.toDate().isBefore(last)) {
+          internetAmounts.add(element['amount']);
+        }
       });
       internetTotal = internetAmounts.sum;
     }
@@ -1132,7 +1259,7 @@ class Repository {
         .collection('users')
         .doc(_firebaseAuth.currentUser!.uid)
         .collection('subscriptions')
-        .where('category', isEqualTo: 'others')
+        .where('category', isEqualTo: 'daily')
         .get();
 
     var documentData4 = sub4.docs;
@@ -1143,12 +1270,16 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThan: first)
+          .where('plan_type', isEqualTo: 'daily')
+          /*.where('bill_date', isGreaterThan: first)
           .where('bill_date', isLessThan: last)
-          .orderBy('bill_date', descending: true)
+          .orderBy('bill_date', descending: true)*/
           .get();
       amountData4.docs.forEach((element) {
-        othersAmounts.add(element['amount']);
+        var date = element['bill_date'] as Timestamp;
+        if (date.toDate().isAfter(first) && date.toDate().isBefore(last)) {
+          othersAmounts.add(element['amount']);
+        }
       });
       othersTotal = othersAmounts.sum;
     }
@@ -1158,7 +1289,6 @@ class Repository {
 
     debugPrint(
         'Total Weekly Category %: $softwarePer, $entertainmentPer, $internetPer, $othersPer');*/
-
 
     return {
       0: softwareTotal,
@@ -1170,7 +1300,8 @@ class Repository {
 
   Future<Map<int, dynamic>> doGetDayAmountByCategory() async {
     var today = DateTime.now();
-    today = DateTime(today.year, today.month, today.day);
+    var todayFormat = '${today.year}-${today.month}-${today.day}';
+    // today = DateTime(today.year, today.month, today.day);
 
     List<num> softwareAmounts = [];
     List<num> entertainmentAmounts = [];
@@ -1197,11 +1328,18 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThanOrEqualTo: today)
-          .orderBy('bill_date', descending: true)
+          .where('plan_type', isEqualTo: 'hourly')
+          /*.where('bill_date', isGreaterThanOrEqualTo: today)
+          .orderBy('bill_date', descending: true)*/
           .get();
       amountData.docs.forEach((element) {
-        softwareAmounts.add(element['amount']);
+        var date = element['bill_date'] as Timestamp;
+        var billDate =
+            '${date.toDate().year}-${date.toDate().month}-${date.toDate().day}';
+
+        if (billDate.trim() == todayFormat.trim()) {
+          softwareAmounts.add(element['amount']);
+        }
       });
       softwareTotal = softwareAmounts.sum;
     }
@@ -1222,11 +1360,18 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThanOrEqualTo: today)
-          .orderBy('bill_date', descending: true)
+          .where('plan_type', isEqualTo: 'hourly')
+          /*.where('bill_date', isGreaterThanOrEqualTo: today)
+          .orderBy('bill_date', descending: true)*/
           .get();
       amountData2.docs.forEach((element) {
-        entertainmentAmounts.add(element['amount']);
+        var date = element['bill_date'] as Timestamp;
+        var billDate =
+            '${date.toDate().year}-${date.toDate().month}-${date.toDate().day}';
+
+        if (billDate.trim() == todayFormat.trim()) {
+          entertainmentAmounts.add(element['amount']);
+        }
       });
       entertainmentTotal = entertainmentAmounts.sum;
     }
@@ -1247,11 +1392,18 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThanOrEqualTo: today)
-          .orderBy('bill_date', descending: true)
+          .where('plan_type', isEqualTo: 'hourly')
+          /*.where('bill_date', isGreaterThanOrEqualTo: today)
+          .orderBy('bill_date', descending: true)*/
           .get();
       amountData3.docs.forEach((element) {
-        internetAmounts.add(element['amount']);
+        var date = element['bill_date'] as Timestamp;
+        var billDate =
+            '${date.toDate().year}-${date.toDate().month}-${date.toDate().day}';
+
+        if (billDate.trim() == todayFormat.trim()) {
+          internetAmounts.add(element['amount']);
+        }
       });
       internetTotal = internetAmounts.sum;
     }
@@ -1272,15 +1424,21 @@ class Repository {
           .collection('subscriptions')
           .doc(doc.id)
           .collection('logs')
-          .where('bill_date', isGreaterThanOrEqualTo: today)
-          .orderBy('bill_date', descending: true)
+          .where('plan_type', isEqualTo: 'hourly')
+          /*.where('bill_date', isGreaterThanOrEqualTo: today)
+          .orderBy('bill_date', descending: true)*/
           .get();
       amountData4.docs.forEach((element) {
-        othersAmounts.add(element['amount']);
+        var date = element['bill_date'] as Timestamp;
+        var billDate =
+            '${date.toDate().year}-${date.toDate().month}-${date.toDate().day}';
+
+        if (billDate.trim() == todayFormat.trim()) {
+          othersAmounts.add(element['amount']);
+        }
       });
       othersTotal = othersAmounts.sum;
     }
-
 
     return {
       0: softwareTotal,
@@ -1288,5 +1446,126 @@ class Repository {
       2: internetTotal,
       3: othersTotal
     };
+  }
+
+  Future<List<Map<String, dynamic>>> doGetMonthlyServices() async {
+    var date = new DateTime.now().toString();
+    var dateParse = DateTime.parse(date);
+    int currentYear = dateParse.year;
+
+    List<Map<String, dynamic>> passData = [];
+
+    var sub = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .get();
+
+    var documentData = sub.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData) {
+      var data = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('plan_type', isEqualTo: 'monthly')
+          .get();
+      data.docs.forEach((element) {
+        var date = element['bill_date'] as Timestamp;
+
+        if (date.toDate().year == currentYear) {
+          passData.add(
+              {'domain': doc.data()['name'], 'measure': element['amount']});
+        }
+      });
+    }
+
+    return passData;
+  }
+
+  Future<List<Map<String, dynamic>>> doGetDailyServices() async {
+    DateTime first = DateTime.now().subtract(new Duration(
+        days: DateTime.now().weekday - 1,
+        hours: DateTime.now().hour,
+        minutes: DateTime.now().minute,
+        seconds: DateTime.now().second,
+        microseconds: DateTime.now().microsecond - 999,
+        milliseconds: DateTime.now().millisecond - 999));
+
+    DateTime last = DateTime.now().subtract(new Duration(
+        days: DateTime.now().weekday - 7,
+        hours: DateTime.now().hour - 23,
+        minutes: DateTime.now().minute - 59,
+        seconds: DateTime.now().second - 59,
+        microseconds: DateTime.now().microsecond - 999,
+        milliseconds: DateTime.now().millisecond - 999));
+
+    List<Map<String, dynamic>> passData = [];
+
+    var sub = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .get();
+
+    var documentData = sub.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData) {
+      var data = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('plan_type', isEqualTo: 'daily')
+          .get();
+      data.docs.forEach((element) {
+        var date = element['bill_date'] as Timestamp;
+
+        if (date.toDate().isAfter(first) && date.toDate().isBefore(last)) {
+          passData.add(
+              {'domain': doc.data()['name'], 'measure': element['amount']});
+        }
+      });
+    }
+
+    return passData;
+  }
+
+  Future<List<Map<String, dynamic>>> doGetHourlyServices() async {
+    var today = DateTime.now();
+    var todayFormat = '${today.year}-${today.month}-${today.day}';
+
+    List<Map<String, dynamic>> passData = [];
+
+    var sub = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .get();
+
+    var documentData = sub.docs;
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in documentData) {
+      var data = await firebaseFirestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser!.uid)
+          .collection('subscriptions')
+          .doc(doc.id)
+          .collection('logs')
+          .where('plan_type', isEqualTo: 'hourly')
+          .get();
+      data.docs.forEach((element) {
+        var date = element['bill_date'] as Timestamp;
+        var billDate =
+            '${date.toDate().year}-${date.toDate().month}-${date.toDate().day}';
+
+        if (billDate.trim() == todayFormat.trim()) {
+          passData.add(
+              {'domain': doc.data()['name'], 'measure': element['amount']});
+        }
+      });
+    }
+
+    return passData;
   }
 }

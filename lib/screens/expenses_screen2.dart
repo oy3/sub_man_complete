@@ -63,6 +63,13 @@ class _ExpensesScreen2State extends State<ExpensesScreen2>
     {'domain': 'Sun', 'measure': 0}
   ];
 
+  List<Map<String, dynamic>> monthChartData = [
+    {'domain': 'Week 1', 'measure': 0},
+    {'domain': 'Week 2', 'measure': 0},
+    {'domain': 'Week 3', 'measure': 0},
+    {'domain': 'Week 4', 'measure': 0},
+  ];
+
   List<Map<String, dynamic>> yearChartData = [
     {'domain': 'Jan', 'measure': 0},
     {'domain': 'Feb', 'measure': 0},
@@ -76,6 +83,11 @@ class _ExpensesScreen2State extends State<ExpensesScreen2>
     {'domain': 'Nov', 'measure': 0},
     {'domain': 'Dec', 'measure': 0},
   ];
+
+  List<Map<String, dynamic>> yearHorizontalChartData = [];
+  List<Map<String, dynamic>> monthHorizontalChartData = [];
+  List<Map<String, dynamic>> weekHorizontalChartData = [];
+  List<Map<String, dynamic>> dayHorizontalChartData = [];
 
   @override
   void initState() {
@@ -168,7 +180,7 @@ class _ExpensesScreen2State extends State<ExpensesScreen2>
                                       fontSize: 16,
                                     ))),
                                 SizedBox(height: 15),
-                                Text(Style.Strings.gbpSymbol + '240.00',
+                                Text(Style.Strings.gbpSymbol + '0.00',
                                     style: GoogleFonts.roboto(
                                         textStyle: TextStyle(
                                       color: Style.Colors.secondaryColor4,
@@ -193,7 +205,7 @@ class _ExpensesScreen2State extends State<ExpensesScreen2>
                                       fontSize: 16,
                                     ))),
                                 SizedBox(height: 15),
-                                Text(Style.Strings.gbpSymbol + '90.00',
+                                Text(Style.Strings.gbpSymbol + '0.00',
                                     style: GoogleFonts.roboto(
                                         textStyle: TextStyle(
                                       color: Style.Colors.secondaryColor4,
@@ -218,7 +230,7 @@ class _ExpensesScreen2State extends State<ExpensesScreen2>
                                       fontSize: 16,
                                     ))),
                                 SizedBox(height: 15),
-                                Text(Style.Strings.gbpSymbol + '150.00',
+                                Text(Style.Strings.gbpSymbol + '0.00',
                                     style: GoogleFonts.roboto(
                                         textStyle: TextStyle(
                                       color: Style.Colors.secondaryColor4,
@@ -409,7 +421,7 @@ class _ExpensesScreen2State extends State<ExpensesScreen2>
                                     if (snapshot.hasData) {
                                       var list =
                                           snapshot.data as Map<int, dynamic>;
-  category = [
+                                      category = [
                                         {
                                           'color': Style.Colors.barColor,
                                           'type': 'Software',
@@ -478,7 +490,6 @@ class _ExpensesScreen2State extends State<ExpensesScreen2>
                                       );
                                     }
                                   }
-
 
                                   return ListView.separated(
                                     shrinkWrap: true,
@@ -568,7 +579,53 @@ class _ExpensesScreen2State extends State<ExpensesScreen2>
                               ),*/
                             ],
                           )
-                        : horizontalBarChart(),
+                        : FutureBuilder(
+                            future: selectServiceFuture(dropdownValue),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasError) {
+                                if (snapshot.hasData) {
+                                  if (dropdownValue == "Today") {
+                                    dayHorizontalChartData = snapshot.data
+                                        as List<Map<String, dynamic>>;
+                                  } else if (dropdownValue == "This Week") {
+                                    weekHorizontalChartData = snapshot.data
+                                        as List<Map<String, dynamic>>;
+                                  } else if (dropdownValue == "This Year") {
+                                    yearHorizontalChartData = snapshot.data
+                                        as List<Map<String, dynamic>>;
+                                  }
+
+                                  return horizontalBarChart();
+                                }
+                              }
+                              return AspectRatio(
+                                aspectRatio: 1,
+                                child: DChartBar(
+                                  data: [
+                                    {
+                                      'id': 'Bar',
+                                      'data': [
+                                        {'domain': '', 'measure': 0}
+                                      ]
+                                    },
+                                  ],
+                                  domainLabelPaddingToAxisLine: 16,
+                                  axisLineColor: Colors.grey[400],
+                                  measureLabelPaddingToAxisLine: 16,
+                                  barColor: (barData, index, id) =>
+                                      Style.Colors.barColor,
+                                  verticalDirection: false,
+                                  barValue: (barData, index) =>
+                                      '${barData['measure']}',
+                                  showBarValue: true,
+                                  barValueColor: Colors.white,
+                                  barValueFontSize: 12,
+                                  barValueAnchor: BarValueAnchor.end,
+                                  barValuePosition: BarValuePosition.auto,
+                                ),
+                              );
+                            },
+                          ),
                     SizedBox(height: 50)
                   ],
                 ),
@@ -626,6 +683,29 @@ class _ExpensesScreen2State extends State<ExpensesScreen2>
     return repo;
   }
 
+  Future<List<Map<String, dynamic>>>? selectServiceFuture(String option) {
+    Future<List<Map<String, dynamic>>>? repo;
+
+    switch (option) {
+      case 'Today':
+        repo = repository.doGetHourlyServices();
+        break;
+      case 'This Week':
+        repo = repository.doGetDailyServices();
+        break;
+      case 'This Month':
+        repo = null;
+        break;
+      case 'This Year':
+        repo = repository.doGetMonthlyServices();
+        break;
+      default:
+        repo = null;
+    }
+
+    return repo;
+  }
+
   Widget tabBar() => TabBar(
         controller: tabController,
         indicatorColor: Style.Colors.barColor,
@@ -664,7 +744,7 @@ class _ExpensesScreen2State extends State<ExpensesScreen2>
         axisLineTick: 2,
         axisLinePointTick: 2,
         axisLinePointWidth: 10,
-        axisLineColor: Colors.black,
+        axisLineColor: Colors.grey[400],
         measureLabelPaddingToAxisLine: 16,
         barColor: (barData, index, id) => Style.Colors.barColor,
         showBarValue: true,
@@ -705,24 +785,14 @@ class _ExpensesScreen2State extends State<ExpensesScreen2>
       aspectRatio: 1,
       child: DChartBar(
         data: [
-          {
-            'id': 'Bar',
-            'data': [
-              {'domain': 'Netflix', 'measure': 1},
-              {'domain': 'Hulu', 'measure': 4},
-              {'domain': 'Office 365', 'measure': 2},
-              {'domain': 'Spotify', 'measure': 6},
-              {'domain': 'Youtube', 'measure': 2},
-              {'domain': 'Dribble', 'measure': 2.2},
-              {'domain': 'Github', 'measure': 1.3},
-            ],
-          },
+          {'id': 'Bar', 'data': changeServiceChart(dropdownValue)},
         ],
         domainLabelPaddingToAxisLine: 16,
-        axisLineColor: Colors.black,
+        axisLineColor: Colors.grey[400],
         measureLabelPaddingToAxisLine: 16,
         barColor: (barData, index, id) => Style.Colors.barColor,
         verticalDirection: false,
+        domainLabelRotation: 270,
         barValue: (barData, index) => '${barData['measure']}',
         showBarValue: true,
         barValueColor: Colors.white,
@@ -739,7 +809,7 @@ class _ExpensesScreen2State extends State<ExpensesScreen2>
     } else if (value == 'This Week') {
       return weekChartData;
     } else if (value == 'This Month') {
-      return [];
+      return monthChartData;
     } else if (value == 'This Year') {
       return yearChartData;
     } else {
@@ -756,6 +826,20 @@ class _ExpensesScreen2State extends State<ExpensesScreen2>
       return monthPieData;
     } else if (value == 'This Year') {
       return yearPieData;
+    } else {
+      return [];
+    }
+  }
+
+  List<Map<String, dynamic>> changeServiceChart(String value) {
+    if (value == 'Today') {
+      return dayHorizontalChartData;
+    } else if (value == 'This Week') {
+      return weekHorizontalChartData;
+    } else if (value == 'This Month') {
+      return monthHorizontalChartData;
+    } else if (value == 'This Year') {
+      return yearHorizontalChartData;
     } else {
       return [];
     }

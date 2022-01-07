@@ -21,7 +21,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
   void initState() {
     super.initState();
 
-    userSubscriptionsListBloc.getUserSubscriptionList();
+    userSubscriptionsListBloc.getUserSubscriptionList('name');
   }
 
   @override
@@ -70,7 +70,15 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                   builder: (BuildContext context,
                       AsyncSnapshot<UserSubscriptionsListResponse> snapshot) {
                     if (snapshot.hasError)
-                      return Center(child: Text('Error: ${snapshot.error}'));
+                      return Center(
+                          child: Text(
+                              'Error loading subscriptions, please try again. ',
+                              style: GoogleFonts.roboto(
+                                  textStyle: TextStyle(
+                                      color: Style.Colors.secondaryColor2,
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 18))));
+                    /*${snapshot.error}*/
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
                         return SubscriptionItemCardLoader(false);
@@ -87,7 +95,15 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                                     .data!.userSubscriptionsList[index]);
                               }
                             }
-                            return Container();
+
+                            return Container(
+                              child: Text('No Added Subscriptions',
+                                  style: GoogleFonts.roboto(
+                                      textStyle: TextStyle(
+                                          color: Style.Colors.secondaryColor2,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 18))),
+                            );
                           },
                         );
                     }

@@ -489,7 +489,7 @@ class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
                                 _timer.cancel();
                                 // Navigator.of(context,rootNavigator: true).pop();
                                 // Navigator.pop(context, 'Delete');
-                                /*  Navigator.pushReplacement(
+                                 /* Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => SubscriptionsScreen()));*/

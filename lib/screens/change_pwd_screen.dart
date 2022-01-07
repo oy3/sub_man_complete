@@ -43,7 +43,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ],
           ),
         ),
-        actions: [
+        /*actions: [
           Center(
             child: Container(
               margin: EdgeInsets.only(right: 10),
@@ -55,13 +55,59 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           fontSize: 18))),
             ),
           ),
-        ],
+        ],*/
       ),
       body: Container(
         color: Style.Colors.secondaryColor3,
         width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: Wrap(
+        height: MediaQuery.of(context).size.height / 2,
+        child: Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 50),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Text(
+                'Request Password Change',
+                style: GoogleFonts.roboto(
+                    textStyle: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 25)),
+              ),
+              Text(
+                  'Click the button below and Check the email address associated with your account',
+                  style: GoogleFonts.roboto(
+                      textStyle: TextStyle(
+                          color: Style.Colors.secondaryColor2,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 18))),
+              ElevatedButton(
+                child: Text("Reset",
+                    style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 18,
+                    ))),
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  minimumSize:
+                      Size(MediaQuery.of(context).size.width / 1.3, 50),
+                  padding: EdgeInsets.all(10),
+                  primary: Colors.black,
+                  onPrimary: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        /*  Wrap(
           children: [
             Card(
               elevation: 0,
@@ -71,7 +117,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               margin: EdgeInsets.symmetric(horizontal: 20, vertical: 50),
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Column(
+                child:
+
+                Column(
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -175,7 +223,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
             )
           ],
-        ),
+        ),*/
       ),
     );
   }

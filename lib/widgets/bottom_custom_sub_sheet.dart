@@ -339,11 +339,11 @@ class _BottomCustomSubSheetState extends State<BottomCustomSubSheet> {
                                 TextStyle(color: Style.Colors.secondaryColor2),
                             underline: Container(),
                             items: <String>[
+                              'Hourly',
                               'Daily',
                               'Weekly',
                               'Monthly',
                               'Yearly',
-                              'Bi-Yearly'
                             ].map<DropdownMenuItem<String>>((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,

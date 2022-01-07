@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sub_man/bloc/user_subscription_list_bloc.dart';
 import 'package:sub_man/model/user_subscriptions.dart';
 import 'package:sub_man/model/user_subscriptions_list_response.dart';
+import 'package:sub_man/repository/repository.dart';
 import 'package:sub_man/screens/reminder_screen.dart';
 import 'package:sub_man/style/theme.dart' as Style;
 import 'package:iconsax/iconsax.dart';
@@ -23,6 +24,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late User _currentUser;
   late String firtname;
 
+  Repository repository = Repository();
+
   UserSubscriptionsListBloc userSubscriptionsListBloc =
       UserSubscriptionsListBloc();
 
@@ -37,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     firtname = splitName[0];
 
-    userSubscriptionsListBloc.getUserSubscriptionList();
+    userSubscriptionsListBloc.getUserSubscriptionList('plans');
   }
 
   @override
@@ -50,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Style.Colors.mainColor,
       body: Container(
-        margin: EdgeInsets.only(left: 20, right: 20, top: 35),
+        margin: EdgeInsets.only(left: 20, right: 20, top: 40),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -66,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontWeight: FontWeight.w700,
                       fontSize: 25,
                     ))),
-                IconButton(
+                /* IconButton(
                     onPressed: () {
                       Navigator.push(
                           context,
@@ -80,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Icon(Iconsax.notification_circle1,
                             size: 33, color: Colors.red)
                       ],
-                    )),
+                    )),*/
               ],
             ),
             SizedBox(height: 20),
@@ -104,13 +107,30 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontSize: 16,
                       ))),
                   SizedBox(height: 10),
-                  Text("£ 15,900.00",
-                      style: GoogleFonts.roboto(
-                          textStyle: TextStyle(
-                        color: Style.Colors.secondaryColor4,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 25,
-                      ))),
+                  FutureBuilder(
+                    future: repository.doGetSubSum(),
+                    builder: (context, snapshot) {
+                      var subTotal;
+
+                      if (!snapshot.hasError) {
+                        if (snapshot.hasData) {
+                          subTotal = snapshot.data;
+                        } else {
+                          subTotal = 0.00;
+                        }
+                      }
+                      return Text(
+                          Style.Strings.gbpSymbol +
+                              (double.parse((subTotal).toStringAsFixed(2)))
+                                  .toString(),
+                          style: GoogleFonts.roboto(
+                              textStyle: TextStyle(
+                            color: Style.Colors.secondaryColor4,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 25,
+                          )));
+                    },
+                  ),
                 ],
               ),
             ),
@@ -128,7 +148,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   builder: (BuildContext context,
                       AsyncSnapshot<UserSubscriptionsListResponse> snapshot) {
                     if (snapshot.hasError)
-                      return Center(child: Text('Error: ${snapshot.error}'));
+                      return Center(
+                          child: Text(
+                              'Error loading subscriptions, please try again. ',
+                              style: GoogleFonts.roboto(
+                                  textStyle: TextStyle(
+                                      color: Style.Colors.secondaryColor2,
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 18))));
+                    /*${snapshot.error}*/
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
                         return SubscriptionItemCardLoader(false);
@@ -140,21 +168,28 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ? 5
                                   : snapshot.data!.userSubscriptionsList.length,
                           itemBuilder: (BuildContext context, int index) {
-                            // List<num> amounts = [];
-
-                            for (dynamic p in snapshot
-                                .data!.userSubscriptionsList[index].plans) {
-                              if (Plans.fromJson(p).active) {
-                                /* amounts.add(Plans.fromJson(p).price);
+                            if (snapshot.hasData) {
+                              for (dynamic p in snapshot
+                                  .data!.userSubscriptionsList[index].plans) {
+                                if (Plans.fromJson(p).active) {
+                                  /* amounts.add(Plans.fromJson(p).price);
                                 debugPrint('Home Total $amounts');*/
-                                // total = amounts.sum;
+                                  // total = amounts.sum;
 
-                                return SubscriptionItemCard(snapshot
-                                    .data!.userSubscriptionsList[index]);
+                                  return SubscriptionItemCard(snapshot
+                                      .data!.userSubscriptionsList[index]);
+                                }
                               }
                             }
 
-                            return Container();
+                            return Container(
+                              child: Text('No Added Subscriptions',
+                                  style: GoogleFonts.roboto(
+                                      textStyle: TextStyle(
+                                          color: Style.Colors.secondaryColor2,
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 18))),
+                            );
                           },
                         );
                     }

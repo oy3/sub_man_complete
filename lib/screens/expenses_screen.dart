@@ -12,7 +12,7 @@ class ExpensesScreen extends StatefulWidget {
 
 class _ExpensesScreenState extends State<ExpensesScreen>
     with TickerProviderStateMixin {
-  String dropdownValue = 'This Year';
+  String dropdownValue = 'Today';
   int selectedTabIndex = 0;
   TabController? tabController;
   int touchedIndex = -1;
@@ -60,18 +60,6 @@ class _ExpensesScreenState extends State<ExpensesScreen>
   @override
   void initState() {
     super.initState();
-
-/*    repository.doGetExpenseByDay().then((value) {
-      weekData = value;
-
-      debugPrint('Week amounts = $weekData');
-    });*/
-
-/*    repository.doGetExpenseByMonth().then((value) {
-      yearData = value;
-
-      debugPrint('Year amounts = $yearData');
-    });*/
 
     tabController = TabController(length: 2, vsync: this);
     tabController!.addListener(() {

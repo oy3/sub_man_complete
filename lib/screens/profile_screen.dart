@@ -26,50 +26,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late UserResponse? _currentUser;
   Repository repository = Repository();
 
-  num software = 0, entertainment = 0, internet = 0, others = 0;
-  num softwarePer = 0, entertainmentPer = 0, internetPer = 0, othersPer = 0;
 
   @override
   void initState() {
     super.initState();
 
-    /*   repository.doGetYearlySumByCategory('software').then((value) {
-      software = value;
-
-      softwarePer =
-          (software / (software + entertainment + internet + others)) * 100;
-
-      debugPrint(
-          'software amounts: ${software.toDouble().toString()}, Percentage: $softwarePer%');
-    });
-
-    repository.doGetYearlySumByCategory('entertainment').then((value) {
-      entertainment = value;
-
-      entertainmentPer =
-          (entertainment / (software + entertainment + internet + others)) *
-              100;
-
-      debugPrint(
-          'entertainment amounts: ${entertainment.toDouble().toString()}, Percentage: $entertainmentPer%');
-    });
-
-    repository.doGetYearlySumByCategory('internet').then((value) {
-      internet = value;
-      internetPer =
-          (internet / (software + entertainment + internet + others)) * 100;
-
-      // debugPrint('internet amounts: ${internet.toDouble().toString()}, Percentage: internetPer%');
-    });
-    repository.doGetYearlySumByCategory('others').then((value) {
-      others = value;
-      othersPer =
-          (others / (software + entertainment + internet + others)) * 100;
-
-      // debugPrint('others amounts: ${others.toDouble().toString()}, Percentage: othersPer%');
-    });
-
-    debugPrint('Calc = $software%, $entertainment%, $internet%, $others%');*/
+    // repository.doGetExpenseByWeek();
   }
 
   @override

@@ -18,9 +18,9 @@ class UserSubscriptionsListBloc {
 
   // late UserSubscriptionsListResponse userSubscriptionListResponse;
 
-  getUserSubscriptionList() async {
+  getUserSubscriptionList(String factor) async {
     userSubscriptionListResponse =
-        await _repository.doGetUserSubscriptionList();
+        await _repository.doGetUserSubscriptionList(factor);
     _subject.sink.add(userSubscriptionListResponse);
   }
 
