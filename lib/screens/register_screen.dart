@@ -36,10 +36,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late Timer _timer;
   late RegistrationBloc registrationBloc;
   late FirebaseFirestore firestore;
+  late bool _passwordVisible, _cPasswordVisible;
 
   @override
   void initState() {
     super.initState();
+    _passwordVisible = true;
+    _cPasswordVisible = true;
+
     registrationBloc = RegistrationBloc();
     firestore = FirebaseFirestore.instance;
     userRegistrationListener();
@@ -56,15 +60,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                  builder: (context) =>
-                      AddPhoneScreen(
-                          user: event, password: _passwordTextController.text)),
-                  (route) => false);
-  /*        Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
                   builder: (context) => AddPhoneScreen(
-                      user: event, password: _passwordTextController.text)));*/
+                      user: event, password: _passwordTextController.text)),
+              (route) => false);
         });
       } else {
         EasyLoading.showError('Error, Try again',
@@ -231,6 +229,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         cpassword: _cPasswordTextController.text),
                     keyboardType: TextInputType.visiblePassword,
                     textInputAction: TextInputAction.next,
+                    obscureText: _passwordVisible,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(horizontal: 15),
                       labelText: 'Password',
@@ -243,6 +242,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hintStyle: TextStyle(
                         color: Colors.grey,
                         fontSize: 14.0,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: Colors.black,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _passwordVisible = !_passwordVisible;
+                          });
+                        },
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderSide:
@@ -272,6 +284,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         password: _passwordTextController.text,
                         cpassword: value!),
                     textInputAction: TextInputAction.done,
+                    obscureText: _cPasswordVisible,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(horizontal: 15),
                       labelText: 'Confirm Password',
@@ -284,6 +297,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hintStyle: TextStyle(
                         color: Colors.grey,
                         fontSize: 14.0,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _cPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: Colors.black,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _cPasswordVisible = !_cPasswordVisible;
+                          });
+                        },
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderSide:

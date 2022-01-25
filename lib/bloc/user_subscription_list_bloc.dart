@@ -12,9 +12,9 @@ class UserSubscriptionsListBloc {
   BehaviorSubject<UserSubscriptionsListResponse> get subject => _subject;
   late UserSubscriptionsListResponse userSubscriptionListResponse;
 
-  BehaviorSubject<bool> _addStatus = BehaviorSubject<bool>();
+  BehaviorSubject<List<String>> _addStatus = BehaviorSubject<List<String>>();
 
-  BehaviorSubject<bool> get addStatus => _addStatus;
+  BehaviorSubject<List<String>> get addStatus => _addStatus;
 
   // late UserSubscriptionsListResponse userSubscriptionListResponse;
 

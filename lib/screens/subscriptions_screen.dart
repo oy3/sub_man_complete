@@ -1,20 +1,22 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sub_man/bloc/user_subscription_list_bloc.dart';
 import 'package:sub_man/model/user_subscriptions.dart';
 import 'package:sub_man/model/user_subscriptions_list_response.dart';
+import 'package:sub_man/screens/subscription_detail_screen.dart';
 import 'package:sub_man/style/theme.dart' as Style;
 import 'package:sub_man/widgets/subscription_item_card.dart';
 import 'package:sub_man/widgets/subscription_item_card_loader.dart';
 
 class SubscriptionsScreen extends StatefulWidget {
   @override
-  _SubscriptionsScreenState createState() => _SubscriptionsScreenState();
+  SubscriptionsScreenState createState() => SubscriptionsScreenState();
 }
 
-class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
+class SubscriptionsScreenState extends State<SubscriptionsScreen> {
   TextEditingController _searchEditingController = TextEditingController();
-  UserSubscriptionsListBloc userSubscriptionsListBloc =
+  static UserSubscriptionsListBloc userSubscriptionsListBloc =
       UserSubscriptionsListBloc();
 
   @override
@@ -78,34 +80,80 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                                       color: Style.Colors.secondaryColor2,
                                       fontWeight: FontWeight.normal,
                                       fontSize: 18))));
-                    /*${snapshot.error}*/
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
                         return SubscriptionItemCardLoader(false);
                       default:
-                        return ListView.builder(
-                          shrinkWrap: true,
-                          itemCount:
-                              snapshot.data!.userSubscriptionsList.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            for (dynamic p in snapshot
-                                .data!.userSubscriptionsList[index].plans) {
-                              if (Plans.fromJson(p).active) {
-                                return SubscriptionItemCard(snapshot
-                                    .data!.userSubscriptionsList[index]);
-                              }
-                            }
+                        return snapshot.data?.userSubscriptionsList.length != 0
+                            ? ListView.builder(
+                                shrinkWrap: true,
+                                itemCount:
+                                    snapshot.data!.userSubscriptionsList.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  for (dynamic p in snapshot.data!
+                                      .userSubscriptionsList[index].plans) {
+                                    if (UserPlans.fromJson(p).active) {
+                                      return GestureDetector(
+                                        child: SubscriptionItemCard(snapshot
+                                            .data!
+                                            .userSubscriptionsList[index]),
+                                        onTap: () async {
+                                          final result = await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SubscriptionDetailScreen(
+                                                      userSubscriptions: snapshot
+                                                          .data!
+                                                          .userSubscriptionsList[
+                                                      index]),
+                                            ),
+                                          );
+                                          if (result == "updated") {
+                                            userSubscriptionsListBloc
+                                                .getUserSubscriptionList(
+                                                'plans');
+                                            SubscriptionsScreenState
+                                                .userSubscriptionsListBloc
+                                                .getUserSubscriptionList(
+                                                'name');
+                                          }
+                                        },
+                                      );
+                                    }
+                                  }
 
-                            return Container(
-                              child: Text('No Added Subscriptions',
-                                  style: GoogleFonts.roboto(
-                                      textStyle: TextStyle(
-                                          color: Style.Colors.secondaryColor2,
-                                          fontWeight: FontWeight.normal,
-                                          fontSize: 18))),
-                            );
-                          },
-                        );
+                                  return Container(
+                                    child: Text('No Added Subscriptions',
+                                        style: GoogleFonts.roboto(
+                                            textStyle: TextStyle(
+                                                color: Style
+                                                    .Colors.secondaryColor2,
+                                                fontWeight: FontWeight.normal,
+                                                fontSize: 18))),
+                                  );
+                                },
+                              )
+                            : Container(
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        FluentIcons.add_circle_24_filled,
+                                        size: 100,
+                                        color: Colors.grey[200],
+                                      ),
+                                      Text('Add New Subscription'.toUpperCase(),
+                                          style: GoogleFonts.roboto(
+                                              textStyle: TextStyle(
+                                                  color: Colors.grey[300],
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 25))),
+                                    ],
+                                  ),
+                                ),
+                              );
                     }
                   }),
             ),

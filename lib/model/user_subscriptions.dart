@@ -17,7 +17,7 @@ class UserSubscriptions {
         plans = json["plans"];
 }
 
-class Plans {
+class UserPlans {
   final String name;
   final double price;
   final String type;
@@ -26,10 +26,10 @@ class Plans {
   final Timestamp startDate;
   final Timestamp endDate;
 
-  Plans(this.name, this.price, this.type, this.active, this.reminder,
+  UserPlans(this.name, this.price, this.type, this.active, this.reminder,
       this.startDate, this.endDate);
 
-  Plans.fromJson(Map<String, dynamic> json)
+  UserPlans.fromJson(Map<String, dynamic> json)
       : name = json["name"],
         price = json["price"].toDouble(),
         type = json["type"],

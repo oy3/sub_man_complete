@@ -1,5 +1,10 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sub_man/repository/fire_auth.dart';
 import 'package:sub_man/style/theme.dart' as Style;
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -8,15 +13,11 @@ class ChangePasswordScreen extends StatefulWidget {
 }
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
-  String? pwd;
-  String? cpwd;
-  TextEditingController? _controller;
+  late Timer _timer;
 
   @override
   void initState() {
     super.initState();
-
-    _controller = TextEditingController(text: "mroyeyinka");
   }
 
   @override
@@ -43,19 +44,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ],
           ),
         ),
-        /*actions: [
-          Center(
-            child: Container(
-              margin: EdgeInsets.only(right: 10),
-              child: Text(Style.Strings.save,
-                  style: GoogleFonts.roboto(
-                      textStyle: TextStyle(
-                          color: Style.Colors.titleColor,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 18))),
-            ),
-          ),
-        ],*/
       ),
       body: Container(
         color: Style.Colors.secondaryColor3,
@@ -80,13 +68,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         fontWeight: FontWeight.w700,
                         fontSize: 25)),
               ),
-              Text(
-                  'Click the button below and Check the email address associated with your account',
-                  style: GoogleFonts.roboto(
-                      textStyle: TextStyle(
-                          color: Style.Colors.secondaryColor2,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 18))),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: Text(
+                    'Click the reset button below and Check the email address associated with your account',
+                    style: GoogleFonts.roboto(
+                        textStyle: TextStyle(
+                            color: Style.Colors.secondaryColor2,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 18))),
+              ),
               ElevatedButton(
                 child: Text("Reset",
                     style: GoogleFonts.poppins(
@@ -94,7 +85,44 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       fontWeight: FontWeight.w400,
                       fontSize: 18,
                     ))),
-                onPressed: () {},
+                onPressed: () async {
+                  User currentUser;
+                  FireAuth.getUser().then((value) async {
+                    currentUser = value!;
+
+                    await EasyLoading.show(
+                      status: 'Loading...',
+                      dismissOnTap: false,
+                      maskType: EasyLoadingMaskType.black,
+                    ).then((value) async {
+                      try {
+                        await FireAuth.resetPassword(currentUser.email!)
+                            .then((value) {
+                          _timer =
+                              Timer.periodic(const Duration(milliseconds: 5000),
+                                  (Timer timer) {
+                            EasyLoading.showInfo(
+                                    'A password reset link has been sent to ${currentUser.email!}!',
+                                    dismissOnTap: false,
+                                    maskType: EasyLoadingMaskType.black)
+                                .then((value) {
+                              /*  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              OnBoardingScreen()));*/
+                            });
+                            _timer.cancel();
+                          });
+                        });
+                      } on Exception catch (e) {
+                        EasyLoading.showError('Error, Try again',
+                            dismissOnTap: false,
+                            maskType: EasyLoadingMaskType.black);
+                      }
+                    });
+                  });
+                },
                 style: ElevatedButton.styleFrom(
                   minimumSize:
                       Size(MediaQuery.of(context).size.width / 1.3, 50),

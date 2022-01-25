@@ -1,13 +1,17 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sub_man/bloc/user_subscription_list_bloc.dart';
+import 'package:sub_man/model/user_subscriptions.dart';
 import 'package:sub_man/repository/repository.dart';
+import 'package:sub_man/screens/home_screen.dart';
 import 'package:sub_man/screens/subscription_detail_screen.dart';
+import 'package:sub_man/screens/subscriptions_screen.dart';
 import 'package:sub_man/style/theme.dart' as Style;
 import 'package:sub_man/widgets/utils.dart';
 
@@ -478,18 +482,44 @@ class _BottomCustomSubSheetState extends State<BottomCustomSubSheet> {
                         startDate,
                         dropdownReminderValue!)
                     .then((value) {
-                  if (value) {
+                  if (value.isNotEmpty) {
+                    var endDate = startDate.add(
+                        Duration(days: subEndDate(dropdownBillCycleValue!)));
+
+                    var customData = {
+                      'category': dropdownCategoryValue,
+                      'image': value[1],
+                      'name': _nameTextController.text,
+                      'uid': value[0],
+                      'plans': [
+                        {
+                          'name': _planTextController.text,
+                          'price': double.parse(_priceTextController.text),
+                          'start_date': Timestamp.fromDate(startDate),
+                          'end_date': Timestamp.fromDate(endDate),
+                          'reminder': dropdownReminderValue,
+                          'type': dropdownBillCycleValue!.toLowerCase(),
+                          'active': true
+                        }
+                      ]
+                    };
+
                     print("Done Saving");
                     _timer = Timer.periodic(const Duration(milliseconds: 3000),
-                        (Timer timer) {
+                        (Timer timer) async {
                       EasyLoading.showSuccess('Saved successfully!',
                           dismissOnTap: false,
                           maskType: EasyLoadingMaskType.black);
                       _timer.cancel();
-                       /* Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SubscriptionDetailScreen()));*/
+                      var result = await Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SubscriptionDetailScreen(userSubscriptions:
+                                  UserSubscriptions.fromJson(customData))));
+                      if (result == "done") {
+                        SubscriptionsScreenState.userSubscriptionsListBloc.getUserSubscriptionList('name');
+                        HomeScreenState.userSubscriptionsListBloc.getUserSubscriptionList('plans');
+                      }
                     });
                   } else {
                     print("Something went wrong");

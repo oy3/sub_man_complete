@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sub_man/repository/fire_auth.dart';
 import 'package:sub_man/screens/onboarding_screen.dart';
 import 'package:sub_man/style/theme.dart' as Style;
-
 import 'nav_screen.dart';
 
 class SplashScreen extends StatefulWidget {

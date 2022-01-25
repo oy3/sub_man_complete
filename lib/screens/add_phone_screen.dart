@@ -80,9 +80,9 @@ class _AddPhoneScreenState extends State<AddPhoneScreen> {
                   borderSide: BorderSide(color: Colors.red, width: 1),
                   borderRadius: BorderRadius.circular(0.0),
                 ),
-                focusedErrorBorder: OutlineInputBorder(
+                /*focusedErrorBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.red, width: 2),
-                    borderRadius: BorderRadius.circular(0.0)),
+                    borderRadius: BorderRadius.circular(0.0)),*/
                 enabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey.shade700, width: 1),
                   borderRadius: BorderRadius.circular(0.0),
@@ -131,11 +131,7 @@ class _AddPhoneScreenState extends State<AddPhoneScreen> {
                             MaterialPageRoute(
                                 builder: (context) =>
                                     NavScreen(user: _currentUser)),
-                                (route) => false);
-                      /*  Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => NavScreen(user: _currentUser)));*/
+                            (route) => false);
                       });
                     });
                   } on Exception catch (e) {

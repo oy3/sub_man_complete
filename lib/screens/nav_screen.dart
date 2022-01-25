@@ -1,24 +1,13 @@
-import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:sub_man/bloc/subscription_list_bloc.dart';
-import 'package:sub_man/model/subscription_list_response.dart';
-import 'package:sub_man/model/subscriptions.dart';
 import 'package:sub_man/screens/expenses_screen.dart';
-import 'package:sub_man/screens/expenses_screen2.dart';
 import 'package:sub_man/screens/home_screen.dart';
 import 'package:sub_man/screens/profile_screen.dart';
 import 'package:sub_man/screens/subscriptions_screen.dart';
 import 'package:sub_man/style/theme.dart' as Style;
-import 'package:sub_man/widgets/bottom_custom_sub_sheet.dart';
 import 'package:sub_man/widgets/bottom_sheet.dart';
-import 'package:sub_man/widgets/bottom_sub_detail_sheet.dart';
-import 'package:sub_man/widgets/general_subscription_item.dart';
-import 'package:sub_man/widgets/utils.dart';
 
 class NavScreen extends StatefulWidget {
   final User user;

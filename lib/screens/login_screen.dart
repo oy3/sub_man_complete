@@ -112,7 +112,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             hintStyle: TextStyle(
                                 color: Style.Colors.secondaryColor7,
                                 fontSize: 15.0),
-
                             enabledBorder: OutlineInputBorder(
                               borderSide: BorderSide(
                                   color: Colors.grey.shade700, width: 1),
@@ -120,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             errorBorder: OutlineInputBorder(
                               borderSide:
-                              BorderSide(color: Colors.red, width: 1),
+                                  BorderSide(color: Colors.red, width: 1),
                               borderRadius: BorderRadius.circular(0.0),
                             ),
                             focusedErrorBorder: OutlineInputBorder(

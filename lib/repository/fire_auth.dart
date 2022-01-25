@@ -106,4 +106,9 @@ class FireAuth {
     FirebaseAuth auth = FirebaseAuth.instance;
     return auth.currentUser;
   }
+
+  static Future resetPassword(String email) async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    return auth.sendPasswordResetEmail(email: email);
+  }
 }

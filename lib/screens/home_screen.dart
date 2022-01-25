@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sub_man/bloc/user_subscription_list_bloc.dart';
@@ -6,6 +7,8 @@ import 'package:sub_man/model/user_subscriptions.dart';
 import 'package:sub_man/model/user_subscriptions_list_response.dart';
 import 'package:sub_man/repository/repository.dart';
 import 'package:sub_man/screens/reminder_screen.dart';
+import 'package:sub_man/screens/subscription_detail_screen.dart';
+import 'package:sub_man/screens/subscriptions_screen.dart';
 import 'package:sub_man/style/theme.dart' as Style;
 import 'package:iconsax/iconsax.dart';
 import 'package:sub_man/widgets/subscription_item_card.dart';
@@ -17,16 +20,16 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({required this.user});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> {
   late User _currentUser;
   late String firtname;
 
   Repository repository = Repository();
 
-  UserSubscriptionsListBloc userSubscriptionsListBloc =
+  static UserSubscriptionsListBloc userSubscriptionsListBloc =
       UserSubscriptionsListBloc();
 
   @override
@@ -156,42 +159,76 @@ class _HomeScreenState extends State<HomeScreen> {
                                       color: Style.Colors.secondaryColor2,
                                       fontWeight: FontWeight.normal,
                                       fontSize: 18))));
-                    /*${snapshot.error}*/
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
                         return SubscriptionItemCardLoader(false);
                       default:
-                        return ListView.builder(
-                          shrinkWrap: true,
-                          itemCount:
-                              (snapshot.data!.userSubscriptionsList.length >= 5)
-                                  ? 5
-                                  : snapshot.data!.userSubscriptionsList.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            if (snapshot.hasData) {
-                              for (dynamic p in snapshot
-                                  .data!.userSubscriptionsList[index].plans) {
-                                if (Plans.fromJson(p).active) {
-                                  /* amounts.add(Plans.fromJson(p).price);
-                                debugPrint('Home Total $amounts');*/
-                                  // total = amounts.sum;
+                        return snapshot.data?.userSubscriptionsList.length != 0
+                            ? ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: (snapshot.data!.userSubscriptionsList
+                                            .length >=
+                                        5)
+                                    ? 5
+                                    : snapshot
+                                        .data!.userSubscriptionsList.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  if (snapshot.hasData) {
+                                    for (dynamic p in snapshot.data!
+                                        .userSubscriptionsList[index].plans) {
+                                      if (UserPlans.fromJson(p).active) {
+                                        /* amounts.add(Plans.fromJson(p).price);
+                                debugPrint('Home Total $amounts');
+                                   total = amounts.sum;*/
 
-                                  return SubscriptionItemCard(snapshot
-                                      .data!.userSubscriptionsList[index]);
-                                }
-                              }
-                            }
+                                        return GestureDetector(
+                                          child: SubscriptionItemCard(snapshot
+                                              .data!
+                                              .userSubscriptionsList[index]),
+                                          onTap: () async {
+                                            final result = await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    SubscriptionDetailScreen(userSubscriptions: snapshot
+                                                        .data!
+                                                        .userSubscriptionsList[index]),
+                                              ),
+                                            );
+                                            if (result == "updated") {
+                                              userSubscriptionsListBloc
+                                                  .getUserSubscriptionList('plans');
+                                              SubscriptionsScreenState.userSubscriptionsListBloc.getUserSubscriptionList('name');
 
-                            return Container(
-                              child: Text('No Added Subscriptions',
-                                  style: GoogleFonts.roboto(
-                                      textStyle: TextStyle(
-                                          color: Style.Colors.secondaryColor2,
-                                          fontWeight: FontWeight.normal,
-                                          fontSize: 18))),
-                            );
-                          },
-                        );
+                                            }
+                                          },
+                                        );
+                                      }
+                                    }
+                                  }
+                                  return Container();
+                                },
+                              )
+                            : Container(
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        FluentIcons.add_circle_24_filled,
+                                        size: 100,
+                                        color: Colors.grey[200],
+                                      ),
+                                      Text('Add New Subscription'.toUpperCase(),
+                                          style: GoogleFonts.roboto(
+                                              textStyle: TextStyle(
+                                                  color: Colors.grey[300],
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 25))),
+                                    ],
+                                  ),
+                                ),
+                              );
                     }
                   }),
             ),

@@ -72,8 +72,15 @@ class Repository {
     });
   }
 
-  Future<bool> addSub(String image, String category, String name, String cycle,
-      String plan, num price, DateTime date, String reminder) async {
+  Future<String> addSub(
+      String image,
+      String category,
+      String name,
+      String cycle,
+      String plan,
+      num price,
+      DateTime date,
+      String reminder) async {
     var endDate = date.add(Duration(days: subEndDate(cycle)));
     CollectionReference users = firebaseFirestore.collection('users');
 
@@ -116,7 +123,7 @@ class Repository {
                   });
                 });
 
-                return true;
+                return doc['uid'];
               }
             });
           }
@@ -155,16 +162,16 @@ class Repository {
           'amount': price,
           'bill_date': date
         });
-        return true;
+        return subAdded.id;
       }
     } on FirebaseException catch (e) {
       debugPrint('Error Uploading $e');
-      return false;
+      return '';
     }
-    return false;
+    return '';
   }
 
-  Future<bool> addCustomSub(
+  Future<List<String>> addCustomSub(
       File image,
       String category,
       String name,
@@ -232,7 +239,7 @@ class Repository {
                   });
                 });
 
-                return true;
+                return [doc['uid'], uploadedImage];
               }
             });
           }
@@ -271,13 +278,13 @@ class Repository {
           'amount': price,
           'bill_date': date
         });
-        return true;
+        return [subAdded2.id, uploadedImage];
       }
     } on FirebaseException catch (e) {
       debugPrint('Error Uploading $e');
-      return false;
+      return ['', ''];
     }
-    return false;
+    return ['', ''];
   }
 
   Future<UserSubscriptionsListResponse> doGetUserSubscriptionList(
@@ -1567,5 +1574,13 @@ class Repository {
     }
 
     return passData;
+  }
+
+  doGetPaidExpenses() async {
+    var snapshot = await firebaseFirestore
+        .collection('users')
+        .doc(_firebaseAuth.currentUser!.uid)
+        .collection('subscriptions')
+        .get();
   }
 }

@@ -16,7 +16,8 @@ import 'package:sub_man/widgets/utils.dart';
 class SubscriptionDetailScreen extends StatefulWidget {
   final UserSubscriptions userSubscriptions;
 
-  SubscriptionDetailScreen(this.userSubscriptions);
+  SubscriptionDetailScreen({Key? key, required this.userSubscriptions})
+      : super(key: key);
 
   @override
   _SubscriptionDetailScreenState createState() =>
@@ -25,13 +26,14 @@ class SubscriptionDetailScreen extends StatefulWidget {
 
 class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
   late Timer _timer;
+
   // String? dropdownCategoryValue;
   // String? dropdownBillCycleValue;
   String? dropdownReminderValue;
 
-  var totalAmount;
+/*var totalAmount;*/
 
-  Plans? activePlan;
+  UserPlans? activePlan;
 
   Repository repository = Repository();
 
@@ -40,21 +42,21 @@ class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
     super.initState();
 
     for (dynamic p in widget.userSubscriptions.plans) {
-      if (Plans.fromJson(p).active) {
-        activePlan = Plans.fromJson(p);
+      if (UserPlans.fromJson(p).active) {
+        activePlan = UserPlans.fromJson(p);
         break;
       }
     }
 
-    // dropdownCategoryValue = widget.userSubscriptions.category;
-    // dropdownBillCycleValue = activePlan!.type.toTitleCase();
+    /* dropdownCategoryValue = widget.userSubscriptions.category;
+    dropdownBillCycleValue = activePlan!.type.toTitleCase();*/
     dropdownReminderValue = activePlan!.reminder;
 
-    repository.doGetBillingSum(widget.userSubscriptions.uid).then((value) {
+/*    repository.doGetBillingSum(widget.userSubscriptions.uid).then((value) {
       setState(() {
         totalAmount = value.toDouble();
       });
-    });
+    });*/
   }
 
   @override
@@ -65,7 +67,7 @@ class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
         backgroundColor: Style.Colors.mainColor,
         elevation: 0,
         leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
+          onTap: () => Navigator.pop(context, "done"),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -82,7 +84,7 @@ class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
             ],
           ),
         ),
-       /* actions: [
+        /* actions: [
           Center(
             child: Container(
               margin: EdgeInsets.only(right: 10),
@@ -226,10 +228,10 @@ class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
                         Text(activePlan!.type.toTitleCase().toCapitalized(),
                             style: GoogleFonts.roboto(
                                 textStyle: TextStyle(
-                                  color: Style.Colors.secondaryColor5,
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16,
-                                ))),
+                              color: Style.Colors.secondaryColor5,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 16,
+                            ))),
                         /*Container(
                           width: 100,
                           child: DropdownButton<String>(
@@ -282,10 +284,10 @@ class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
                       Text(activePlan!.reminder.toTitleCase().toCapitalized(),
                           style: GoogleFonts.roboto(
                               textStyle: TextStyle(
-                                color: Style.Colors.secondaryColor5,
-                                fontWeight: FontWeight.w400,
-                                fontSize: 16,
-                              ))),
+                            color: Style.Colors.secondaryColor5,
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
+                          ))),
                       /*Container(
                         width: 150,
                         child: DropdownButton<String>(
@@ -418,7 +420,24 @@ class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
                             fontWeight: FontWeight.w400,
                             fontSize: 16,
                           ))),
-                      Text(
+                      FutureBuilder(
+                        future: repository
+                            .doGetBillingSum(widget.userSubscriptions.uid),
+                        builder: (context, snapshot) {
+                          return Text(
+                              (snapshot.hasData)
+                                  ? Style.Strings.gbpSymbol +
+                                      snapshot.data.toString()
+                                  : Style.Strings.gbpSymbol + '0.00',
+                              style: GoogleFonts.roboto(
+                                  textStyle: TextStyle(
+                                color: Style.Colors.secondaryColor5,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                              )));
+                        },
+                      ),
+                      /* Text(
                           (totalAmount != null)
                               ? Style.Strings.gbpSymbol + totalAmount.toString()
                               : Style.Strings.gbpSymbol + '0.00',
@@ -427,7 +446,7 @@ class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
                             color: Style.Colors.secondaryColor5,
                             fontWeight: FontWeight.w500,
                             fontSize: 16,
-                          ))),
+                          ))),*/
                     ],
                   ),
                 ],
@@ -441,78 +460,85 @@ class _SubscriptionDetailScreenState extends State<SubscriptionDetailScreen> {
                     fontWeight: FontWeight.w400,
                     fontSize: 18,
                   ))),
-              onPressed: () => showDialog<String>(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) => AlertDialog(
-                  title: Text(Style.Strings.delSub,
-                      style: GoogleFonts.roboto(
-                          textStyle: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 18,
-                      ))),
-                  content: Text(Style.Strings.delDialogDes,
-                      style: GoogleFonts.roboto(
-                          textStyle: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14,
-                      ))),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, 'Cancel'),
-                      child: Text(Style.Strings.cancel,
-                          style: GoogleFonts.roboto(
-                              textStyle: TextStyle(
-                            color: Style.Colors.titleColor,
-                            fontWeight: FontWeight.w400,
-                            fontSize: 17,
-                          ))),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        Navigator.pop(context, 'Delete');
-                        await EasyLoading.show(
-                          status: 'Deleting...',
-                          dismissOnTap: false,
-                          maskType: EasyLoadingMaskType.black,
-                        ).then((value) {
-                          repository
-                              .deleteSubscription(widget.userSubscriptions)
-                              .then((value) {
-                            if (value) {
-                              _timer = Timer.periodic(
-                                  const Duration(milliseconds: 3000),
-                                  (Timer timer) {
-                                EasyLoading.showSuccess('Deleted successfully!',
-                                    dismissOnTap: false,
-                                    maskType: EasyLoadingMaskType.black);
-                                _timer.cancel();
-                                // Navigator.of(context,rootNavigator: true).pop();
-                                // Navigator.pop(context, 'Delete');
-                                 /* Navigator.pushReplacement(
+              onPressed: () async {
+                final result = await showDialog<String>(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: Text(Style.Strings.delSub,
+                        style: GoogleFonts.roboto(
+                            textStyle: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                        ))),
+                    content: Text(Style.Strings.delDialogDes,
+                        style: GoogleFonts.roboto(
+                            textStyle: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14,
+                        ))),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, 'Cancel'),
+                        child: Text(Style.Strings.cancel,
+                            style: GoogleFonts.roboto(
+                                textStyle: TextStyle(
+                              color: Style.Colors.titleColor,
+                              fontWeight: FontWeight.w400,
+                              fontSize: 17,
+                            ))),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          await EasyLoading.show(
+                            status: 'Deleting...',
+                            dismissOnTap: false,
+                            maskType: EasyLoadingMaskType.black,
+                          ).then((value) {
+                            repository
+                                .deleteSubscription(widget.userSubscriptions)
+                                .then((value) {
+                              if (value) {
+                                _timer = Timer.periodic(
+                                    const Duration(milliseconds: 3000),
+                                    (Timer timer) {
+                                  EasyLoading.showSuccess(
+                                      'Deleted successfully!',
+                                      dismissOnTap: false,
+                                      maskType: EasyLoadingMaskType.black);
+                                  _timer.cancel();
+                                  // Navigator.of(context,rootNavigator: true).pop();
+                                  Navigator.pop(context, 'Delete');
+/*                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => SubscriptionsScreen()));*/
-                              });
-                            } else {
-                              EasyLoading.showError('Error, Try again',
-                                  dismissOnTap: false,
-                                  maskType: EasyLoadingMaskType.black);
-                            }
+                                        builder: (context) => SubscriptionsScreen()));
+*/
+                                });
+                              } else {
+                                EasyLoading.showError('Error, Try again',
+                                    dismissOnTap: false,
+                                    maskType: EasyLoadingMaskType.black);
+                              }
+                            });
                           });
-                        });
-                      },
-                      child: Text(Style.Strings.delete,
-                          style: GoogleFonts.roboto(
-                              textStyle: TextStyle(
-                            color: Colors.red.shade700,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 17,
-                          ))),
-                    ),
-                  ],
-                ),
-              ),
+                        },
+                        child: Text(Style.Strings.delete,
+                            style: GoogleFonts.roboto(
+                                textStyle: TextStyle(
+                              color: Colors.red.shade700,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 17,
+                            ))),
+                      ),
+                    ],
+                  ),
+                );
+                debugPrint("RESULT $result");
+                if (result == "Delete") {
+                  Navigator.of(context).pop("updated");
+                }
+              },
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 minimumSize: Size(MediaQuery.of(context).size.width, 50),
